@@ -1,0 +1,29 @@
+<div class="page page-form">
+  <app-module-action-header
+    title="Attendance Entry"
+    backLink="/attendance"
+    [showSave]="true"
+    [showReset]="true"
+    (save)="onSave()"
+    (reset)="onReset()"
+  />
+
+  <app-voice-dynamic-form
+    [columns]="columns"
+    [formValues]="formValues"
+    [validationErrors]="validationErrors"
+    configureColumnsLink="/attendance/columns"
+    [hideFormActions]="true"
+    (save)="onSave()"
+    (resetForm)="onReset()"
+  >
+    <label class="field" slot="extra-fields">
+      <span>Student</span>
+      <select [(ngModel)]="selectedStudentId" name="studentId">
+        @for (student of students; track student.id) {
+          <option [ngValue]="student.id">{{ student.name }} ({{ student.rollNo }})</option>
+        }
+      </select>
+    </label>
+  </app-voice-dynamic-form>
+</div>

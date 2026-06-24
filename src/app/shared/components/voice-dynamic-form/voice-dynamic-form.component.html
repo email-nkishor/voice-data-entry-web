@@ -1,0 +1,65 @@
+<app-voice-input-panel
+  [columns]="columns"
+  (valuesParsed)="onVoiceParsed($event)"
+  (resetRequested)="onReset()"
+  (listeningStarted)="onGlobalListeningStart()"
+/>
+
+<form class="form card" (ngSubmit)="onSubmit()">
+  <ng-content select="[slot=extra-fields]"></ng-content>
+
+  @for (column of columns; track column.columnKey) {
+    <label class="field" [class.field-error]="getFieldError(column.columnKey)">
+      <span>{{ column.label }}</span>
+
+      <div class="field-with-voice">
+        @if (isMultiline(column)) {
+          <textarea
+            [(ngModel)]="formValues[column.columnKey]"
+            [name]="column.columnKey"
+            rows="3"
+          ></textarea>
+        } @else {
+          <input
+            [(ngModel)]="formValues[column.columnKey]"
+            [name]="column.columnKey"
+            [type]="getInputType(column)"
+          />
+        }
+
+        <button
+          type="button"
+          class="field-mic-btn"
+          [class.listening]="isFieldListening(column.columnKey)"
+          [disabled]="!speechSupported"
+          [title]="isFieldListening(column.columnKey) ? 'Stop and apply' : 'Speak for ' + column.label"
+          (click)="toggleFieldMic(column)"
+        >
+          <i
+            class="fa-solid"
+            [class.fa-microphone]="!isFieldListening(column.columnKey)"
+            [class.fa-stop]="isFieldListening(column.columnKey)"
+          ></i>
+        </button>
+      </div>
+
+      @if (isFieldListening(column.columnKey) && fieldTranscript) {
+        <small class="field-voice-hint">Heard: {{ fieldTranscript }}</small>
+      }
+
+      @if (getFieldError(column.columnKey)) {
+        <small class="field-error-text">{{ getFieldError(column.columnKey) }}</small>
+      }
+    </label>
+  }
+
+  <div class="form-actions">
+    @if (configureColumnsLink) {
+      <a [routerLink]="configureColumnsLink" class="btn btn-outline btn-sm">Configure Voice Columns</a>
+    }
+    @if (!hideFormActions) {
+      <button type="button" class="btn btn-outline" (click)="onReset()">Reset</button>
+      <button type="submit" class="btn btn-primary">{{ submitLabel }}</button>
+    }
+  </div>
+</form>

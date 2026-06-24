@@ -1,0 +1,68 @@
+// Shared header utilities (used in projected content + module-action-header)
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+
+  .divider {
+    width: 1px;
+    height: 1.5rem;
+    background: rgba(255, 255, 255, 0.45);
+  }
+}
+
+.header-btn-white {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.85rem;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+  font-family: inherit;
+
+  &:hover {
+    background: #f5f5f5;
+  }
+}
+
+.header-nav-link {
+  border: none;
+  background: none;
+  color: var(--text-on-green);
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0.25rem 0;
+  font-family: inherit;
+  white-space: nowrap;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+a.header-nav-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+.header-select {
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  min-width: 5rem;
+  font-family: inherit;
+}

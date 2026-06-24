@@ -1,0 +1,16 @@
+<section class="page">
+  <app-module-action-header title="Voice Data Entry" [showBack]="false" />
+
+  <p class="intro">Select a module to begin offline data entry in your browser.</p>
+  <span class="badge"><i class="fa-solid fa-cloud-arrow-down"></i> Offline · IndexedDB</span>
+
+  <div class="card-grid">
+    @for (item of navItems; track item.route) {
+      <a [routerLink]="item.route" class="nav-card card">
+        <span class="icon"><i [class]="item.iconClass"></i></span>
+        <h2>{{ item.title }}</h2>
+        <p>{{ item.description }}</p>
+      </a>
+    }
+  </div>
+</section>

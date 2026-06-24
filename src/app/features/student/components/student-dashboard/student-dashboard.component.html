@@ -1,0 +1,162 @@
+<div class="traqtion-dashboard">
+  <app-module-action-header title="Student" [showBack]="false">
+    <div headerActions class="header-actions">
+      <select [(ngModel)]="selectedGroupId" class="header-select" name="groupFilter">
+        <option [ngValue]="'all'">All</option>
+        @for (group of groups; track group.id) {
+          <option [ngValue]="group.id">{{ group.name }}</option>
+        }
+      </select>
+      <span class="divider"></span>
+      <button type="button" class="header-nav-link" (click)="openManageGroups()">
+        Manage Groups
+      </button>
+      <a routerLink="/student/list" class="header-nav-link">Search Student</a>
+      <a [routerLink]="createStudentLink" class="header-nav-link">Create Student</a>
+    </div>
+  </app-module-action-header>
+
+  @if (showManageGroups) {
+    <div class="modal-backdrop" (click)="closeManageGroups()">
+      <div class="modal-panel manage-groups-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2><i class="fa-solid fa-graduation-cap"></i> Student Groups</h2>
+          <button type="button" class="modal-close" aria-label="Close" (click)="closeManageGroups()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <ul class="group-list">
+            @for (group of groups; track group.id) {
+              <li>
+                <div>
+                  <strong>{{ group.name }}</strong>
+                  @if (group.isDefault) {
+                    <span class="badge">Default</span>
+                  }
+                  @if (group.description) {
+                    <p>{{ group.description }}</p>
+                  }
+                </div>
+                @if (!group.isDefault) {
+                  <button type="button" class="btn-delete-group" (click)="onDeleteGroup(group)">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                }
+              </li>
+            }
+          </ul>
+
+          <form class="add-group-form" (submit)="$event.preventDefault(); onAddGroup()">
+            <input [(ngModel)]="newGroupName" name="groupName" placeholder="New group name" />
+            <input [(ngModel)]="newGroupDescription" name="groupDesc" placeholder="Description (optional)" />
+            <button type="submit" class="btn-add-group">
+              <i class="fa-solid fa-plus"></i> Add Group
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="dashboard-body">
+    <p class="group-banner">
+      <i class="fa-solid fa-filter"></i> Viewing: <strong>{{ selectedGroupLabel }}</strong>
+    </p>
+
+    <div class="dashboard-top">
+      <section class="card dashboard-panel charts-panel">
+        <div class="panel-head">
+          <h2><i class="fa-solid fa-chart-pie"></i> Student Dashboard</h2>
+          <a routerLink="/student/list" class="view-all">View All</a>
+        </div>
+        <div class="charts-row">
+          <div class="chart-block">
+            <h3>Students (By Status)</h3>
+            <app-donut-chart [segments]="statusSegments" />
+          </div>
+          <div class="chart-block">
+            <h3>Students (By Class)</h3>
+            <app-donut-chart [segments]="classSegments" />
+          </div>
+        </div>
+      </section>
+
+      <aside class="card dashboard-panel activity-panel">
+        <div class="panel-head">
+          <h2><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</h2>
+        </div>
+        <ul class="activity-list">
+          @for (item of recentActivity; track item.id) {
+            <li>
+              <button type="button" class="activity-link" (click)="openStudent(item.studentId)">
+                <i class="fa-solid fa-circle activity-icon"></i>
+                <div>
+                  <p><strong>{{ item.studentName }}</strong> — {{ item.message }}</p>
+                  <small>{{ item.actionDate }} · {{ item.loggedDate }}</small>
+                </div>
+              </button>
+            </li>
+          }
+        </ul>
+        <a routerLink="/student/list" class="view-all panel-foot">View All</a>
+      </aside>
+    </div>
+
+    <div class="dashboard-bottom">
+      <section class="card dashboard-panel">
+        <div class="panel-head">
+          <h2><i class="fa-solid fa-list-check"></i> My Worklist</h2>
+        </div>
+        <ul class="count-list">
+          @for (item of worklist; track item.id) {
+            <li>
+              <button type="button" class="count-item" [disabled]="!item.studentId" (click)="openStudent(item.studentId)">
+                <span class="count-badge">{{ item.count }}</span>
+                <span>{{ item.label }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <section class="card dashboard-panel">
+        <div class="panel-head">
+          <h2><i class="fa-solid fa-bell"></i> Alert(s)</h2>
+        </div>
+        <ul class="count-list">
+          @for (item of alerts; track item.id) {
+            <li>
+              <button type="button" class="count-item" [disabled]="!item.studentId" (click)="openStudent(item.studentId)">
+                <span class="count-badge alert">{{ item.count }}</span>
+                <span>{{ item.label }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <section class="card dashboard-panel">
+        <div class="panel-head tabs">
+          <button type="button" [class.active]="favoriteTab === 'searches'" (click)="favoriteTab = 'searches'">
+            Favorite Searches
+          </button>
+          <button type="button" [class.active]="favoriteTab === 'students'" (click)="favoriteTab = 'students'">
+            My Favorites
+          </button>
+        </div>
+        <ul class="favorite-list">
+          @for (item of favorites; track item.id) {
+            <li>
+              <button type="button" class="favorite-link" [disabled]="!item.studentId" (click)="openStudent(item.studentId)">
+                <span>{{ item.title }}</span>
+                <small>{{ item.date }}</small>
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+    </div>
+  </div>
+</div>

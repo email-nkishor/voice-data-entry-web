@@ -1,0 +1,73 @@
+<section class="voice-panel card">
+  <h3>Voice Entry</h3>
+  <p class="hint free-note">
+    Speech uses your device or browser recognition (may need internet on some browsers). Field mapping is fully local and free.
+  </p>
+
+  <label class="field language-field">
+    <span>Language</span>
+    <select
+      [ngModel]="selectedLanguage"
+      (ngModelChange)="onLanguageChange($event)"
+      name="speechLanguage"
+    >
+      @for (language of languages; track language.code) {
+        <option [ngValue]="language.code">{{ language.label }}</option>
+      }
+    </select>
+  </label>
+
+  <p class="hint">{{ hintText }}</p>
+
+  @if (!speechSupported) {
+    <p class="warning">Speech recognition requires Chrome or Edge.</p>
+  }
+
+  <div class="voice-actions">
+    <button
+      type="button"
+      class="btn btn-primary"
+      [class.btn-danger]="isListening"
+      [disabled]="!speechSupported"
+      (click)="onToggleListening()"
+    >
+      <i class="fa-solid fa-microphone"></i>
+      {{ isListening ? 'Stop Listening' : 'Start Speaking' }}
+      <i class="fa-solid fa-chevron-down"></i>
+    </button>
+    <button
+      type="button"
+      class="btn btn-outline"
+      [disabled]="!transcript"
+      (click)="onApplyTranscript()"
+    >
+      Apply
+    </button>
+    <button type="button" class="btn btn-outline" (click)="onReset()">Reset</button>
+  </div>
+
+  <p class="hint modify-hint">
+    Use the <i class="fa-solid fa-microphone"></i> on each field to speak one value at a time, or use Start Speaking above for all fields together. Say <strong>reset</strong> / <strong>re entry</strong> to clear the form.
+  </p>
+
+  @if (isListening) {
+    <p class="listening">Listening... speak field keywords clearly, then tap Stop.</p>
+  }
+
+  @if (transcript) {
+    <p class="transcript"><strong>Heard:</strong> {{ transcript }}</p>
+  }
+
+  @if (parseWarning) {
+    <p class="warning">{{ parseWarning }}</p>
+  }
+
+  @if (getPreviewEntries().length > 0) {
+    <div class="preview">
+      <strong>Mapped fields:</strong>
+      @for (entry of getPreviewEntries(); track entry.key) {
+        <p>{{ entry.key }}: {{ entry.value }}</p>
+      }
+    </div>
+  }
+</section>

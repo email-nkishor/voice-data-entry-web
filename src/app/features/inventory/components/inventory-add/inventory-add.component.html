@@ -1,0 +1,19 @@
+<div class="page page-form">
+  <app-module-action-header
+    title="Add Inventory Item"
+    backLink="/inventory"
+    [showSave]="true"
+    [showReset]="true"
+    (save)="onSave()"
+    (reset)="onReset()"
+  />
+  <app-voice-dynamic-form
+    [columns]="columns"
+    [formValues]="formValues"
+    [validationErrors]="validationErrors"
+    configureColumnsLink="/inventory/columns"
+    [hideFormActions]="true"
+    (save)="onSave()"
+    (resetForm)="onReset()"
+  />
+</div>

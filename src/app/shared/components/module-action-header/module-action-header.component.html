@@ -1,0 +1,35 @@
+<header class="module-action-header">
+  <div class="module-action-inner">
+    <div class="module-action-left">
+      <a [routerLink]="homeLink" class="icon-btn" title="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+      <span class="divider"></span>
+      <h1>{{ title }}</h1>
+    </div>
+
+    <div class="module-action-right">
+      <ng-content select="[headerActions]" />
+
+      @if (showReset) {
+        <button type="button" class="action-btn" (click)="reset.emit()">
+          <i class="fa-solid fa-rotate-left"></i> Reset
+        </button>
+      }
+      @if (showSave) {
+        <button type="button" class="action-btn" (click)="save.emit()">
+          <i class="fa-solid fa-floppy-disk"></i> Save
+        </button>
+      }
+
+      @if (showBack) {
+        @if (dividerBeforeBack) {
+          <span class="divider"></span>
+        }
+        <a [routerLink]="backLink" class="header-btn-white">
+          <i class="fa-solid fa-arrow-left"></i> Back
+        </a>
+      }
+    </div>
+  </div>
+</header>

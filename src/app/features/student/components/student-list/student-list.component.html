@@ -1,0 +1,308 @@
+<div class="page student-list-page">
+  <app-module-action-header
+    title="Search Student"
+    backLink="/student/dashboard"
+    [showDividerBeforeBack]="true"
+  >
+    <div headerActions class="header-actions">
+      <button type="button" class="header-btn-white" (click)="onAdd()">
+        <i class="fa-solid fa-plus"></i> Add Student
+      </button>
+    </div>
+  </app-module-action-header>
+
+  <div class="list-toolbar">
+    <button
+      type="button"
+      class="btn-filter"
+      [class.active]="showFilterPopup"
+      (click)="openFilterPopup()"
+    >
+      Filter Result <i class="fa-solid fa-chevron-down"></i>
+    </button>
+
+    <div class="view-toggle">
+      <button type="button" [class.active]="viewMode === 'table'" (click)="setViewMode('table')">
+        Table
+      </button>
+      <button type="button" [class.active]="viewMode === 'card'" (click)="setViewMode('card')">
+        Cards
+      </button>
+    </div>
+
+    <div class="quick-search-wrap">
+      <i class="fa-solid fa-magnifying-glass search-prefix-icon"></i>
+      <input
+        type="search"
+        class="quick-search"
+        placeholder="Quick search students..."
+        [ngModel]="searchTerm"
+        (ngModelChange)="onQuickSearch($event)"
+      />
+    </div>
+
+    <span class="spacer"></span>
+
+    <button type="button" class="toolbar-icon-btn excel" title="Export Excel" (click)="onExportExcel()">
+      <i class="fa-solid fa-file-excel"></i>
+    </button>
+
+    <button type="button" class="toolbar-icon-btn" title="Manage columns" (click)="openManageColumns()">
+      <i class="fa-solid fa-table-columns"></i>
+    </button>
+  </div>
+
+  <p class="result-count">
+    Showing {{ pageStart }}–{{ pageEnd }} of {{ filteredStudents.length }} students
+    @if (hasActiveFilters) {
+      <button type="button" class="btn btn-outline btn-sm clear-filters-btn" (click)="clearAllFilters()">
+        Clear all filters
+      </button>
+    }
+  </p>
+
+  @if (viewMode === 'table') {
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="col-check">
+              <input
+                type="checkbox"
+                [checked]="allPageSelected"
+                (change)="toggleSelectAll($any($event.target).checked)"
+              />
+            </th>
+            @for (column of visibleColumns; track column.key) {
+              <th>{{ column.label }}</th>
+            }
+            <th>Actions</th>
+          </tr>
+          <tr class="filter-row">
+            <th></th>
+            @for (column of visibleColumns; track column.key) {
+              <th>
+                @if (column.filterable) {
+                  <input
+                    class="filter-input"
+                    [(ngModel)]="columnFilters[column.key]"
+                    [name]="'inline-' + column.key"
+                    placeholder="Search"
+                    (ngModelChange)="onInlineFilterChange()"
+                  />
+                }
+              </th>
+            }
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (student of paginatedStudents; track student.id; let odd = $odd) {
+            <tr>
+              <td class="col-check">
+                <input
+                  type="checkbox"
+                  [checked]="isSelected(student.id!)"
+                  (change)="toggleSelect(student.id!, $any($event.target).checked)"
+                />
+              </td>
+              @for (column of visibleColumns; track column.key) {
+                <td>
+                  @if (column.key === 'name') {
+                    <button type="button" class="grid-link" (click)="onView(student.id!)">
+                      {{ getCellValue(student, column.key) }}
+                    </button>
+                  } @else {
+                    {{ getCellValue(student, column.key) }}
+                  }
+                </td>
+              }
+              <td class="actions-cell">
+                <button type="button" class="icon-action-btn edit" title="Edit" (click)="onEdit(student.id!)">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button
+                  type="button"
+                  class="icon-action-btn delete"
+                  title="Delete"
+                  (click)="onDeleteRequest(student.id!)"
+                >
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td [attr.colspan]="visibleColumns.length + 2">
+                <div class="empty-state">
+                  @if (hasActiveFilters) {
+                    <p>No students match your filters.</p>
+                  } @else {
+                    <p>No students yet.</p>
+                    <button type="button" class="btn btn-primary" (click)="onAdd()">+ Add Student</button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <div class="table-pager">
+        <span class="pager-info">
+          {{ pageStart }} - {{ pageEnd }} of {{ filteredStudents.length }} items
+        </span>
+        <div class="pager-controls">
+          <label>
+            Items per page
+            <select [ngModel]="pageSize" (ngModelChange)="setPageSize($event)">
+              @for (size of pageSizes; track size) {
+                <option [ngValue]="size">{{ size }}</option>
+              }
+            </select>
+          </label>
+          <div class="pager-buttons">
+            <button type="button" [disabled]="pageIndex === 0" (click)="goToPage(pageIndex - 1)">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <span>{{ pageIndex + 1 }} / {{ totalPages }}</span>
+            <button type="button" [disabled]="pageIndex >= totalPages - 1" (click)="goToPage(pageIndex + 1)">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="card-grid">
+      @for (student of filteredStudents; track student.id) {
+        <article class="card list-item">
+          @for (column of visibleColumns; track column.key) {
+            @if (column.key === 'name') {
+              <h3>
+                <button type="button" class="grid-link" (click)="onView(student.id!)">
+                  {{ getCellValue(student, column.key) }}
+                </button>
+              </h3>
+            } @else {
+              <p>{{ column.label }}: {{ getCellValue(student, column.key) }}</p>
+            }
+          }
+          <div class="item-actions">
+            <button type="button" class="card-action-btn edit" (click)="onEdit(student.id!)">
+              <i class="fa-solid fa-pen"></i> Edit
+            </button>
+            <button type="button" class="card-action-btn delete" (click)="onDeleteRequest(student.id!)">
+              <i class="fa-solid fa-trash"></i> Delete
+            </button>
+          </div>
+        </article>
+      } @empty {
+        <div class="empty-state card" style="grid-column: 1 / -1">
+          @if (hasActiveFilters) {
+            <p>No students match your filters.</p>
+          } @else {
+            <p>No students yet.</p>
+            <button type="button" class="btn btn-primary" (click)="onAdd()">+ Add Student</button>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  @if (showFilterPopup) {
+    <div class="modal-backdrop" (click)="closeFilterPopup()">
+      <div class="modal-panel filter-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Filter Students</h2>
+          <button type="button" class="modal-close" aria-label="Close" (click)="closeFilterPopup()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="modal-body filter-modal-body">
+          <div class="filter-form">
+            @for (column of filterableColumns; track column.key) {
+              <label class="filter-field">
+                <span>{{ column.label }}</span>
+                <input
+                  type="text"
+                  [(ngModel)]="draftColumnFilters[column.key]"
+                  [name]="'filter-' + column.key"
+                  [placeholder]="'Search ' + column.label"
+                />
+              </label>
+            }
+          </div>
+
+          <aside class="filter-criteria">
+            <h3>Criteria</h3>
+            <ul class="criteria-list">
+              @for (criteria of savedCriteria; track criteria.id) {
+                <li>
+                  <button type="button" class="criteria-item" (click)="applyCriteria(criteria)">
+                    <i class="fa-solid fa-star criteria-star"></i>
+                    <span>{{ criteria.name }}</span>
+                  </button>
+                  <button type="button" class="criteria-remove" title="Remove" (click)="removeCriteria(criteria.id)">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </li>
+              }
+            </ul>
+          </aside>
+        </div>
+
+        <div class="modal-footer filter-modal-footer">
+          <button type="button" class="btn-save-criteria" (click)="saveSearchCriteria()">
+            Save Search Criteria
+          </button>
+          <div class="filter-footer-actions">
+            <button type="button" class="btn-filter-reset" (click)="resetFilterDraft()">Reset</button>
+            <button type="button" class="btn-filter-search" (click)="applyFilters()">Search</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showManageColumns) {
+    <div class="modal-backdrop" (click)="closeManageColumns()">
+      <div class="modal-panel manage-columns-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Manage Columns</h2>
+          <button type="button" class="modal-close" aria-label="Close" (click)="closeManageColumns()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-body manage-columns-list">
+          @for (column of columns; track column.key) {
+            <label class="manage-column-item" [class.locked-column]="!canHideColumn(column)">
+              <input
+                type="checkbox"
+                [(ngModel)]="column.visible"
+                [disabled]="!canHideColumn(column)"
+                (ngModelChange)="onColumnVisibilityChange(column)"
+              />
+              <span>{{ column.label }}</span>
+              @if (!canHideColumn(column)) {
+                <i class="fa-solid fa-lock" title="Required column"></i>
+              }
+            </label>
+          }
+        </div>
+        <div class="modal-footer manage-columns-footer">
+          <button type="button" class="btn-filter-search" (click)="closeManageColumns()">Done</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showDeleteDialog) {
+    <app-confirmation-dialog
+      message="Delete this student?"
+      (confirmed)="onDeleteConfirmed()"
+      (cancelled)="onDeleteCancelled()"
+    />
+  }
+</div>

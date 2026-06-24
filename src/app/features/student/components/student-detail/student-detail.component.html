@@ -1,0 +1,78 @@
+@if (student) {
+  <div class="student-detail-page">
+    <app-module-action-header title="Student" backLink="/student/dashboard" [showDividerBeforeBack]="true">
+      <div headerActions class="header-actions">
+        <a routerLink="/student/list" class="header-action-btn header-action-btn-outline">
+          <i class="fa-solid fa-magnifying-glass"></i> Search Student
+        </a>
+        <button type="button" class="header-action-btn header-action-btn-primary" (click)="onEdit()">
+          Edit Student
+        </button>
+      </div>
+    </app-module-action-header>
+
+    <div class="detail-title-bar card">
+      <div>
+        <p class="student-code">{{ studentCode }}</p>
+        <h2>{{ student.name }}</h2>
+      </div>
+      <span class="status-pill" [style.background]="getStatusColor()">{{ status }}</span>
+    </div>
+
+    <div class="detail-grid">
+      <section class="card detail-main">
+        <h3>Student Information</h3>
+        <dl class="info-grid">
+          <div>
+            <dt>Name</dt>
+            <dd>{{ student.name }}</dd>
+          </div>
+          <div>
+            <dt>Class</dt>
+            <dd>{{ student.class || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Roll Number</dt>
+            <dd>{{ student.rollNo || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Mobile</dt>
+            <dd>{{ student.mobile || '—' }}</dd>
+          </div>
+          <div class="full">
+            <dt>Address</dt>
+            <dd>{{ student.address || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Created Date</dt>
+            <dd>{{ student.createdDate | date: 'dd MMM yyyy' }}</dd>
+          </div>
+          <div>
+            <dt>Sync Status</dt>
+            <dd>{{ student.syncStatus ?? 'pending' }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <aside class="card detail-side">
+        <h3>Recent Activity</h3>
+        <ul class="activity-list">
+          @for (item of activities; track item.id) {
+            <li>
+              <span class="activity-dot"></span>
+              <div>
+                <p>{{ item.message }}</p>
+                <small>{{ item.actionDate }} · {{ item.loggedDate }}</small>
+              </div>
+            </li>
+          }
+        </ul>
+      </aside>
+    </div>
+
+    <footer class="detail-footer">
+      <a routerLink="/student/dashboard">← Back to Student Dashboard</a>
+      <a routerLink="/student/list">View All Students</a>
+    </footer>
+  </div>
+}

@@ -1,0 +1,102 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.field-with-voice {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+
+  input,
+  textarea {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 0;
+    padding: 0.5rem 2.25rem 0.5rem 0;
+    background: transparent;
+    font: inherit;
+    font-size: var(--font-size-base);
+    color: var(--text-primary);
+
+    &:focus {
+      outline: none;
+      border-bottom-color: var(--color-primary-blue);
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    padding-right: 2.25rem;
+  }
+}
+
+.field-mic-btn {
+  position: absolute;
+  right: 0;
+  bottom: 0.35rem;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-primary-blue);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  opacity: 0.75;
+  transition: opacity 0.15s ease, color 0.15s ease;
+
+  &:hover:not(:disabled) {
+    opacity: 1;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  &.listening {
+    color: var(--color-danger);
+    opacity: 1;
+    animation: mic-pulse 1.2s ease-in-out infinite;
+  }
+}
+
+.field-voice-hint {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--color-primary-blue);
+  font-size: var(--font-size-xs);
+}
+
+.form.card .field {
+  margin-bottom: var(--space-xl);
+
+  > span {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+  }
+}
+
+.form-actions {
+  margin-top: var(--space-md);
+}
+
+@keyframes mic-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
