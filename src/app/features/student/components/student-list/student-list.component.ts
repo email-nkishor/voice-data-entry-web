@@ -1,13 +1,26 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService } from '../../../../core/services/auth.service';
+import { LookupOption, LookupService } from '../../../../core/services/lookup.service';
 import { ListColumn } from '../../../../core/models/list-column.model';
 import { ToastService } from '../../../../core/services/toast.service';
 import { exportToExcelFile } from '../../../../core/utils/excel-export.util';
 import { ModuleActionHeaderComponent } from '../../../../shared/components/module-action-header/module-action-header.component';
 import { ConfirmationDialogComponent } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
-import { Student } from '../../models/student.model';
+import {
+  deriveStudentStatus,
+  formatStudentCode,
+  STUDENT_STATUS_COLORS,
+  STUDENT_STATUS_LABELS,
+  Student,
+} from '../../models/student.model';
+import { StudentActivityService } from '../../services/student-activity.service';
 import { StudentService } from '../../services/student.service';
+import {
+  mergeStudentListColumns,
+  STUDENT_LIST_COLUMNS,
+} from '../../config/student-list-columns';
 
 type ViewMode = 'table' | 'card';
 
@@ -17,25 +30,11 @@ interface SavedSearchCriteria {
   filters: Record<string, string>;
 }
 
-const COLUMN_STORAGE_KEY = 'student-list-columns';
+const COLUMN_STORAGE_KEY = 'student-list-columns-v2';
 const VIEW_STORAGE_KEY = 'student-list-view-mode';
 const CRITERIA_STORAGE_KEY = 'student-list-saved-criteria';
 
-const DEFAULT_COLUMNS: ListColumn[] = [
-  { key: 'name', label: 'Name', visible: true, filterable: true, exportable: true, allowHide: false },
-  { key: 'class', label: 'Class', visible: true, filterable: true, exportable: true, allowHide: false },
-  { key: 'rollNo', label: 'Roll No', visible: true, filterable: true, exportable: true, allowHide: false },
-  { key: 'mobile', label: 'Mobile', visible: true, filterable: true, exportable: true, allowHide: false },
-  { key: 'address', label: 'Address', visible: false, filterable: true, exportable: true, allowHide: true },
-  {
-    key: 'createdDate',
-    label: 'Created Date',
-    visible: false,
-    filterable: true,
-    exportable: true,
-    allowHide: true,
-  },
-];
+const DEFAULT_COLUMNS: ListColumn[] = STUDENT_LIST_COLUMNS;
 
 @Component({
   selector: 'app-student-list',
@@ -62,17 +61,33 @@ export class StudentListComponent implements OnInit {
   pageIndex = 0;
   pageSize = 20;
   readonly pageSizes = [10, 20, 50, 100];
+  groupId: number | 'all' = 'all';
 
   constructor(
     private studentService: StudentService,
     private toastService: ToastService,
+    private authService: AuthService,
+    private lookupService: LookupService,
+    private route: ActivatedRoute,
     private router: Router
   ) {}
 
   async ngOnInit(): Promise<void> {
+    const groupParam = this.route.snapshot.queryParamMap.get('groupId');
+    if (groupParam) {
+      const parsed = Number(groupParam);
+      if (!Number.isNaN(parsed)) {
+        this.groupId = parsed;
+      }
+    }
     this.restorePreferences();
     this.loadSavedCriteria();
+    await this.lookupService.loadLookups();
     await this.loadStudents();
+  }
+
+  get canDelete(): boolean {
+    return this.authService.hasRole('admin', 'admission_clerk');
   }
 
   get visibleColumns(): ListColumn[] {
@@ -132,9 +147,11 @@ export class StudentListComponent implements OnInit {
   }
 
   async loadStudents(): Promise<void> {
-    this.students = this.searchTerm.trim()
-      ? await this.studentService.search(this.searchTerm)
-      : await this.studentService.getAll();
+    if (this.searchTerm.trim()) {
+      this.students = await this.studentService.search(this.searchTerm, this.groupId);
+    } else {
+      this.students = await this.studentService.getByGroup(this.groupId);
+    }
     this.pageIndex = 0;
   }
 
@@ -272,7 +289,34 @@ export class StudentListComponent implements OnInit {
     if (key === 'createdDate') {
       return this.formatDate(student.createdDate);
     }
+    if (key === 'status') {
+      const status = deriveStudentStatus(student);
+      return this.lookupService.getLabel('status', status) || STUDENT_STATUS_LABELS[status] || status;
+    }
+    if (key === 'feeStatus') {
+      const feeStatus = student.feeStatus ?? '';
+      return this.lookupService.getLabel('feeStatus', feeStatus) || feeStatus;
+    }
+    if (key === 'section') {
+      const grade = student.section ?? '';
+      return this.lookupService.getLabel('grade', grade) || grade;
+    }
+    if (key === 'class') {
+      const classValue = student.class ?? '';
+      return this.lookupService.getLabel('class', classValue) || classValue;
+    }
     return String((student as unknown as Record<string, string>)[key] ?? '');
+  }
+
+  isSelectFilter(column: ListColumn): boolean {
+    return column.filterType === 'select' && !!column.lookupKey;
+  }
+
+  getFilterOptions(column: ListColumn): LookupOption[] {
+    if (!column.lookupKey) {
+      return [];
+    }
+    return this.lookupService.getOptions(column.lookupKey);
   }
 
   onAdd(): void {
@@ -345,12 +389,28 @@ export class StudentListComponent implements OnInit {
 
   private matchesFilters(student: Student): boolean {
     for (const column of this.columns) {
-      const filter = (this.columnFilters[column.key] ?? '').trim().toLowerCase();
+      const filter = (this.columnFilters[column.key] ?? '').trim();
       if (!filter) {
         continue;
       }
-      const value = this.getCellValue(student, column.key).toLowerCase();
-      if (!value.includes(filter)) {
+
+      const rawValue =
+        column.key === 'status'
+          ? deriveStudentStatus(student)
+          : String((student as unknown as Record<string, string>)[column.key] ?? '');
+      const displayValue = this.getCellValue(student, column.key);
+
+      if (column.filterType === 'select') {
+        const matchesValue =
+          rawValue.toLowerCase() === filter.toLowerCase() ||
+          displayValue.toLowerCase() === filter.toLowerCase();
+        if (!matchesValue) {
+          return false;
+        }
+        continue;
+      }
+
+      if (!displayValue.toLowerCase().includes(filter.toLowerCase())) {
         return false;
       }
     }
@@ -376,19 +436,26 @@ export class StudentListComponent implements OnInit {
 
     const savedColumns = localStorage.getItem(COLUMN_STORAGE_KEY);
     if (!savedColumns) {
+      this.columns = mergeStudentListColumns(null);
       return;
     }
 
     try {
-      const visibility = JSON.parse(savedColumns) as Record<string, boolean>;
+      const parsed = JSON.parse(savedColumns) as ListColumn[] | Record<string, boolean>;
+      if (Array.isArray(parsed)) {
+        this.columns = mergeStudentListColumns(parsed);
+        return;
+      }
+
+      this.columns = mergeStudentListColumns(null);
+      const visibility = parsed as Record<string, boolean>;
       for (const column of this.columns) {
         if (Object.prototype.hasOwnProperty.call(visibility, column.key)) {
-          const nextVisible = visibility[column.key];
-          column.visible = column.allowHide === false ? true : nextVisible;
+          column.visible = column.allowHide === false ? true : visibility[column.key];
         }
       }
     } catch {
-      // Ignore invalid saved preferences.
+      this.columns = mergeStudentListColumns(null);
     }
   }
 

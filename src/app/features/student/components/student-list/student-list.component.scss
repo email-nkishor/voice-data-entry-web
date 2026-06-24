@@ -132,10 +132,31 @@
   background: var(--bg-surface);
 }
 
+.data-table-scroll {
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    height: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #bdbdbd;
+    border-radius: 999px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f5f5f5;
+  }
+}
+
 .data-table {
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
   font-size: var(--font-size-sm);
+  table-layout: fixed;
 
   th,
   td {
@@ -143,18 +164,37 @@
     text-align: left;
     border-bottom: 1px solid var(--border-table);
     vertical-align: middle;
+    min-width: 7.5rem;
+    max-width: 12rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   thead th {
     background: var(--bg-table-header);
     font-weight: 700;
     color: var(--text-primary);
-    white-space: nowrap;
   }
 
   .col-check {
     width: 42px;
+    min-width: 42px;
+    max-width: 42px;
     text-align: center;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: var(--bg-surface);
+  }
+
+  thead .col-check {
+    background: var(--bg-table-header);
+    z-index: 3;
+  }
+
+  tbody tr:hover .col-check {
+    background: var(--bg-table-alt);
   }
 
   tbody tr:hover {
@@ -167,14 +207,28 @@
     font-weight: 400;
   }
 
-  .filter-input {
+  .filter-row .col-check {
+    z-index: 3;
+  }
+
+  .filter-input,
+  .filter-select {
     width: 100%;
+    min-width: 5.5rem;
     padding: 0.35rem 0.5rem;
     border: 1px solid var(--border-input);
     border-radius: var(--radius-sm);
     font: inherit;
     font-size: var(--font-size-xs);
+    background: var(--bg-surface);
+    color: var(--text-primary);
   }
+}
+
+.actions-cell {
+  white-space: nowrap;
+  min-width: 5.5rem;
+  max-width: 5.5rem;
 }
 
 .grid-link {
@@ -186,14 +240,16 @@
   font-weight: 600;
   cursor: pointer;
   text-align: left;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  vertical-align: bottom;
 
   &:hover {
     text-decoration: underline;
   }
-}
-
-.actions-cell {
-  white-space: nowrap;
 }
 
 .icon-action-btn {
@@ -363,13 +419,16 @@
     color: var(--text-primary);
   }
 
-  input {
+  input,
+  select {
     padding: 0.5rem 0.65rem;
     border: 1px solid var(--border-input);
     border-radius: var(--radius-sm);
     font: inherit;
     font-size: var(--font-size-base);
     width: 100%;
+    background: var(--bg-surface);
+    color: var(--text-primary);
   }
 }
 

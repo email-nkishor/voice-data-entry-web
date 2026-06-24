@@ -1,5 +1,6 @@
 <app-voice-input-panel
   [columns]="columns"
+  [showEngineSelector]="false"
   (valuesParsed)="onVoiceParsed($event)"
   (resetRequested)="onReset()"
   (listeningStarted)="onGlobalListeningStart()"
@@ -19,6 +20,16 @@
             [name]="column.columnKey"
             rows="3"
           ></textarea>
+        } @else if (isSelect(column)) {
+          <select
+            [(ngModel)]="formValues[column.columnKey]"
+            [name]="column.columnKey"
+          >
+            <option value="">Select {{ column.label }}</option>
+            @for (option of getSelectOptions(column); track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
         } @else {
           <input
             [(ngModel)]="formValues[column.columnKey]"

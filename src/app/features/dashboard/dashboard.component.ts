@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ModuleActionHeaderComponent } from '../../shared/components/module-action-header/module-action-header.component';
+import { SpeechEngineSelectorComponent } from '../../shared/components/speech-engine-selector/speech-engine-selector.component';
 import {
   DASHBOARD_NAV_ITEMS,
   DashboardNavItem,
@@ -9,7 +10,7 @@ import {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, ModuleActionHeaderComponent],
+  imports: [RouterLink, ModuleActionHeaderComponent, SpeechEngineSelectorComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })

@@ -1,4 +1,4 @@
-export type DynamicFieldType = 'text' | 'number' | 'phone' | 'multiline';
+export type DynamicFieldType = 'text' | 'number' | 'phone' | 'multiline' | 'select';
 
 export interface DynamicColumn {
   id?: number;
@@ -9,6 +9,8 @@ export interface DynamicColumn {
   fieldType: DynamicFieldType;
   sortOrder: number;
   isLeadingField?: boolean;
+  /** Backend lookup category for select fields (e.g. class, grade) */
+  lookupKey?: string;
   /** System fields cannot be removed from column config */
   isSystemField?: boolean;
   /** When false, Remove is hidden (defaults to true for custom columns) */

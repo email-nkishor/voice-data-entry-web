@@ -1,5 +1,6 @@
 export type SyncEntity =
   | 'student'
+  | 'studentGroup'
   | 'attendance'
   | 'expense'
   | 'inventory'

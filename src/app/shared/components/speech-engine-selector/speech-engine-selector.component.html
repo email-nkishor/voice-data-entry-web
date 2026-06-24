@@ -1,0 +1,39 @@
+<section class="engine-selector card">
+  <h3>Voice Input Method</h3>
+  <p class="hint">Choose how speech is captured and mapped to form fields.</p>
+
+  <div class="engine-grid">
+    @for (option of speechSettings.options; track option.id) {
+      <label class="engine-card" [class.selected]="selectedEngine === option.id">
+        <input
+          type="radio"
+          name="speechEngine"
+          [value]="option.id"
+          [checked]="selectedEngine === option.id"
+          (change)="onEngineChange(option.id)"
+        />
+        <div class="engine-card-body">
+          <div class="engine-card-head">
+            <strong>{{ option.title }}</strong>
+            <span class="engine-badge">{{ option.badge }}</span>
+          </div>
+          <p>{{ option.description }}</p>
+        </div>
+      </label>
+    }
+  </div>
+
+  @if (speechSettings.selectedOption.needsApiKey) {
+    <label class="field api-key-field">
+      <span>{{ speechSettings.selectedOption.apiKeyLabel }}</span>
+      <input
+        type="password"
+        [ngModel]="apiKey"
+        (ngModelChange)="onApiKeyChange($event)"
+        [name]="speechSettings.selectedOption.id + 'Key'"
+        placeholder="Paste API key (stored locally in browser)"
+        autocomplete="off"
+      />
+    </label>
+  }
+</section>

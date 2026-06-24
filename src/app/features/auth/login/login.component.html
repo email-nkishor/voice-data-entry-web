@@ -1,0 +1,33 @@
+<div class="login-page">
+  <div class="login-card card">
+    <h1>Voice Data Entry</h1>
+    <p class="subtitle">Institute sign-in</p>
+
+    <form (submit)="$event.preventDefault(); onSubmit()">
+      <label class="field">
+        <span>Email</span>
+        <input type="email" [(ngModel)]="email" name="email" required autocomplete="username" />
+      </label>
+
+      <label class="field">
+        <span>Password</span>
+        <input
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          required
+          autocomplete="current-password"
+        />
+      </label>
+
+      <button type="submit" class="btn btn-primary login-btn" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Signing in…' : 'Sign In' }}
+      </button>
+    </form>
+
+    <p class="hint">
+      Demo: clerk@institute.local / clerk123<br />
+      API must run at <code>http://localhost:3000</code>
+    </p>
+  </div>
+</div>

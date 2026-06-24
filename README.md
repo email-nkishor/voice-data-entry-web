@@ -47,7 +47,24 @@ Configure voice keywords at **Configure Voice Columns** on each form (e.g. `/stu
 
 ## Offline
 
-All data is stored in the browser **IndexedDB** database `VoiceDataEntryDB`. Changes are queued in `syncQueue` for a future Node.js API sync (not implemented yet).
+All data is stored in the browser **IndexedDB** database `VoiceDataEntryDB`. Changes are queued in `syncQueue` and pushed to the **voice-data-entry-api** Node server when you click **Sync Now**.
+
+## Auth & sync
+
+1. Start API: `cd ../voice-data-entry-api && npm run dev`
+2. Login at `/login` (e.g. clerk@institute.local / clerk123)
+3. Work offline — add students with voice entry
+4. Click **Sync Now** in the top bar when API is online
+
+## 3-phase student module
+
+| Phase | Features |
+|-------|----------|
+| **1 — Offline camp** | Extended fields, groups, real dashboard, activity log |
+| **2 — Sync** | Push queue to API, online/offline indicator |
+| **3 — SIS foundation** | JWT auth, roles, admission approval workflow |
+
+See root [README.md](../README.md) for full stack setup.
 
 ## Speech note
 

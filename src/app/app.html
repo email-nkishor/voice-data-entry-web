@@ -1,7 +1,12 @@
 <div class="app-shell">
+  <app-sync-bar />
   <main class="app-main">
     <router-outlet />
   </main>
+
+  <footer class="app-footer">
+    <p>&copy; {{ currentYear }} Voice Data Entry. All rights reserved.</p>
+  </footer>
 
   <app-toast />
 </div>

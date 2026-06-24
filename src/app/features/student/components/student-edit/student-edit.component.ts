@@ -7,10 +7,14 @@ import { validateModuleForm } from '../../../../core/utils/form-validation.util'
 import { createEmptyFormValues } from '../../../../core/utils/voice-form.util';
 import { ModuleActionHeaderComponent } from '../../../../shared/components/module-action-header/module-action-header.component';
 import { VoiceDynamicFormComponent } from '../../../../shared/components/voice-dynamic-form/voice-dynamic-form.component';
+import {
+  extractCustomFieldValues,
+  parseCustomData,
+  studentFromFormValues,
+  studentToFormValues,
+} from '../../models/student.model';
 import { Student } from '../../models/student.model';
 import { StudentService } from '../../services/student.service';
-
-const KNOWN_STUDENT_KEYS = ['name', 'class', 'rollNo', 'mobile', 'address'];
 
 @Component({
   selector: 'app-student-edit',
@@ -27,6 +31,7 @@ export class StudentEditComponent implements OnInit {
   studentId?: number;
   createdDate = '';
   groupId?: number;
+  serverId?: number;
 
   constructor(
     private formSchemaService: FormSchemaService,
@@ -52,6 +57,7 @@ export class StudentEditComponent implements OnInit {
       this.studentId = existing.id;
       this.createdDate = existing.createdDate;
       this.groupId = existing.groupId;
+      this.serverId = existing.serverId;
       this.populateForm(existing);
     } else {
       this.resetForm();
@@ -83,17 +89,13 @@ export class StudentEditComponent implements OnInit {
       return;
     }
 
-    const student: Student = {
+    const student = studentFromFormValues(this.formValues, {
       id: this.studentId,
-      name: this.formValues['name'] ?? '',
-      class: this.formValues['class'] ?? '',
-      rollNo: this.formValues['rollNo'] ?? '',
-      mobile: this.formValues['mobile'] ?? '',
-      address: this.formValues['address'] ?? '',
       createdDate: this.createdDate,
       groupId: this.groupId,
-      customData: JSON.stringify(this.getCustomFieldValues()),
-    };
+      serverId: this.serverId,
+      customData: JSON.stringify(extractCustomFieldValues(this.formValues)),
+    });
 
     await this.studentService.update(student);
     this.toastService.success('Updated successfully');
@@ -101,41 +103,11 @@ export class StudentEditComponent implements OnInit {
   }
 
   private populateForm(student: Student): void {
-    const customValues = this.parseCustomData(student.customData);
-    this.formValues = createEmptyFormValues(this.columns);
-    for (const column of this.columns) {
-      const key = column.columnKey;
-      if (KNOWN_STUDENT_KEYS.includes(key)) {
-        this.formValues[key] =
-          String((student as unknown as Record<string, string>)[key] ?? '');
-      } else {
-        this.formValues[key] = customValues[key] ?? '';
-      }
-    }
+    const customValues = parseCustomData(student.customData);
+    this.formValues = studentToFormValues(student, this.columns, customValues);
   }
 
   private resetForm(): void {
     this.formValues = createEmptyFormValues(this.columns);
-  }
-
-  private getCustomFieldValues(): Record<string, string> {
-    const customValues: Record<string, string> = {};
-    for (const column of this.columns) {
-      if (!KNOWN_STUDENT_KEYS.includes(column.columnKey)) {
-        customValues[column.columnKey] = this.formValues[column.columnKey] ?? '';
-      }
-    }
-    return customValues;
-  }
-
-  private parseCustomData(customData?: string): Record<string, string> {
-    if (!customData) {
-      return {};
-    }
-    try {
-      return JSON.parse(customData) as Record<string, string>;
-    } catch {
-      return {};
-    }
   }
 }

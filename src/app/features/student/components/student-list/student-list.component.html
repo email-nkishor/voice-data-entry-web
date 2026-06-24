@@ -54,6 +54,9 @@
 
   <p class="result-count">
     Showing {{ pageStart }}–{{ pageEnd }} of {{ filteredStudents.length }} students
+    @if (groupId !== 'all') {
+      <span class="group-filter-label">(filtered by group)</span>
+    }
     @if (hasActiveFilters) {
       <button type="button" class="btn btn-outline btn-sm clear-filters-btn" (click)="clearAllFilters()">
         Clear all filters
@@ -63,7 +66,8 @@
 
   @if (viewMode === 'table') {
     <div class="data-table-wrap">
-      <table class="data-table">
+      <div class="data-table-scroll" tabindex="0" aria-label="Student table horizontal scroll">
+        <table class="data-table">
         <thead>
           <tr>
             <th class="col-check">
@@ -83,13 +87,27 @@
             @for (column of visibleColumns; track column.key) {
               <th>
                 @if (column.filterable) {
-                  <input
-                    class="filter-input"
-                    [(ngModel)]="columnFilters[column.key]"
-                    [name]="'inline-' + column.key"
-                    placeholder="Search"
-                    (ngModelChange)="onInlineFilterChange()"
-                  />
+                  @if (isSelectFilter(column)) {
+                    <select
+                      class="filter-select"
+                      [(ngModel)]="columnFilters[column.key]"
+                      [name]="'inline-' + column.key"
+                      (ngModelChange)="onInlineFilterChange()"
+                    >
+                      <option value="">All</option>
+                      @for (option of getFilterOptions(column); track option.value) {
+                        <option [value]="option.value">{{ option.label }}</option>
+                      }
+                    </select>
+                  } @else {
+                    <input
+                      class="filter-input"
+                      [(ngModel)]="columnFilters[column.key]"
+                      [name]="'inline-' + column.key"
+                      placeholder="Search"
+                      (ngModelChange)="onInlineFilterChange()"
+                    />
+                  }
                 }
               </th>
             }
@@ -121,14 +139,16 @@
                 <button type="button" class="icon-action-btn edit" title="Edit" (click)="onEdit(student.id!)">
                   <i class="fa-solid fa-pen"></i>
                 </button>
-                <button
-                  type="button"
-                  class="icon-action-btn delete"
-                  title="Delete"
-                  (click)="onDeleteRequest(student.id!)"
-                >
-                  <i class="fa-solid fa-trash"></i>
-                </button>
+                @if (canDelete) {
+                  <button
+                    type="button"
+                    class="icon-action-btn delete"
+                    title="Delete"
+                    (click)="onDeleteRequest(student.id!)"
+                  >
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                }
               </td>
             </tr>
           } @empty {
@@ -147,6 +167,7 @@
           }
         </tbody>
       </table>
+      </div>
 
       <div class="table-pager">
         <span class="pager-info">
@@ -192,9 +213,11 @@
             <button type="button" class="card-action-btn edit" (click)="onEdit(student.id!)">
               <i class="fa-solid fa-pen"></i> Edit
             </button>
-            <button type="button" class="card-action-btn delete" (click)="onDeleteRequest(student.id!)">
-              <i class="fa-solid fa-trash"></i> Delete
-            </button>
+            @if (canDelete) {
+              <button type="button" class="card-action-btn delete" (click)="onDeleteRequest(student.id!)">
+                <i class="fa-solid fa-trash"></i> Delete
+              </button>
+            }
           </div>
         </article>
       } @empty {
@@ -225,12 +248,24 @@
             @for (column of filterableColumns; track column.key) {
               <label class="filter-field">
                 <span>{{ column.label }}</span>
-                <input
-                  type="text"
-                  [(ngModel)]="draftColumnFilters[column.key]"
-                  [name]="'filter-' + column.key"
-                  [placeholder]="'Search ' + column.label"
-                />
+                @if (isSelectFilter(column)) {
+                  <select
+                    [(ngModel)]="draftColumnFilters[column.key]"
+                    [name]="'filter-' + column.key"
+                  >
+                    <option value="">All {{ column.label }}</option>
+                    @for (option of getFilterOptions(column); track option.value) {
+                      <option [value]="option.value">{{ option.label }}</option>
+                    }
+                  </select>
+                } @else {
+                  <input
+                    type="text"
+                    [(ngModel)]="draftColumnFilters[column.key]"
+                    [name]="'filter-' + column.key"
+                    [placeholder]="'Search ' + column.label"
+                  />
+                }
               </label>
             }
           </div>

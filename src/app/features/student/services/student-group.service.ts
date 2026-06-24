@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DatabaseService } from '../../../core/services/database.service';
+import { SyncQueueService } from '../../../core/services/sync-queue.service';
 import { StudentGroup } from '../models/student-group.model';
 
 const DEFAULT_GROUPS: Omit<StudentGroup, 'id'>[] = [
@@ -23,19 +24,14 @@ const DEFAULT_GROUPS: Omit<StudentGroup, 'id'>[] = [
 
 @Injectable({ providedIn: 'root' })
 export class StudentGroupService {
-  constructor(private databaseService: DatabaseService) {}
+  constructor(
+    private databaseService: DatabaseService,
+    private syncQueueService: SyncQueueService
+  ) {}
 
   async getAll(): Promise<StudentGroup[]> {
     await this.seedDefaultsIfNeeded();
     return this.databaseService.db.studentGroups.orderBy('name').toArray();
-  }
-
-  async add(group: Omit<StudentGroup, 'id'>): Promise<number> {
-    return this.databaseService.db.studentGroups.add({
-      ...group,
-      createdDate: group.createdDate || new Date().toISOString(),
-      isDefault: group.isDefault ?? false,
-    });
   }
 
   async delete(id: number): Promise<void> {
@@ -44,6 +40,23 @@ export class StudentGroupService {
       throw new Error('Default group cannot be deleted');
     }
     await this.databaseService.db.studentGroups.delete(id);
+    await this.syncQueueService.enqueue('studentGroup', 'delete', { id }, id);
+  }
+
+  async add(group: Omit<StudentGroup, 'id'>): Promise<number> {
+    const id = await this.databaseService.db.studentGroups.add({
+      ...group,
+      createdDate: group.createdDate || new Date().toISOString(),
+      isDefault: group.isDefault ?? false,
+      syncStatus: 'pending',
+    });
+    await this.syncQueueService.enqueue(
+      'studentGroup',
+      'create',
+      { ...group, id, createdDate: group.createdDate || new Date().toISOString() },
+      id
+    );
+    return id;
   }
 
   private async seedDefaultsIfNeeded(): Promise<void> {

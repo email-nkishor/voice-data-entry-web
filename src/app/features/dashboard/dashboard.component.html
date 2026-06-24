@@ -4,6 +4,8 @@
   <p class="intro">Select a module to begin offline data entry in your browser.</p>
   <span class="badge"><i class="fa-solid fa-cloud-arrow-down"></i> Offline · IndexedDB</span>
 
+  <app-speech-engine-selector />
+
   <div class="card-grid">
     @for (item of navItems; track item.route) {
       <a [routerLink]="item.route" class="nav-card card">

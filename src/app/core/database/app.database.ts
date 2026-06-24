@@ -8,6 +8,7 @@ import { Expense } from '../../features/expense/models/expense.model';
 import { InventoryItem } from '../../features/inventory/models/inventory.model';
 import { Survey } from '../../features/survey/models/survey.model';
 import { Patient } from '../../features/patient/models/patient.model';
+import { StudentActivity } from '../../features/student/models/student-activity.model';
 
 export class AppDatabase extends Dexie {
   students!: Table<Student, number>;
@@ -19,6 +20,7 @@ export class AppDatabase extends Dexie {
   patients!: Table<Patient, number>;
   formColumns!: Table<FormColumnRecord, number>;
   syncQueue!: Table<SyncQueueItem, number>;
+  studentActivities!: Table<StudentActivity, number>;
 
   constructor() {
     super('VoiceDataEntryDB');
@@ -37,6 +39,20 @@ export class AppDatabase extends Dexie {
     this.version(2).stores({
       students: '++id, name, rollNo, createdDate, syncStatus, groupId',
       studentGroups: '++id, name, createdDate',
+      attendance: '++id, studentId, attendanceDate, syncStatus',
+      expenses: '++id, expenseDate, syncStatus',
+      inventory: '++id, purchaseDate, syncStatus',
+      surveys: '++id, surveyDate, syncStatus',
+      patients: '++id, patientName, syncStatus',
+      formColumns: '++id, moduleCode, columnKey, sortOrder',
+      syncQueue: '++id, entity, synced, createdAt',
+    });
+
+    this.version(3).stores({
+      students:
+        '++id, name, rollNo, createdDate, updatedDate, syncStatus, groupId, status, serverId',
+      studentGroups: '++id, name, createdDate, serverId',
+      studentActivities: '++id, studentId, actionDate',
       attendance: '++id, studentId, attendanceDate, syncStatus',
       expenses: '++id, expenseDate, syncStatus',
       inventory: '++id, purchaseDate, syncStatus',

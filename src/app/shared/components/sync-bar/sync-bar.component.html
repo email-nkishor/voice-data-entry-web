@@ -1,0 +1,38 @@
+@if (showBar) {
+  <div class="sync-bar-wrap">
+    <div class="sync-bar">
+      @if (state$ | async; as state) {
+        <span class="sync-status" [class.online]="state.apiOnline" [class.offline]="!state.apiOnline">
+          <i class="fa-solid fa-circle"></i>
+          {{ state.apiOnline ? 'API Online' : 'API Offline' }}
+        </span>
+
+        @if (state.pendingCount > 0) {
+          <span class="pending-badge">{{ state.pendingCount }} pending</span>
+        }
+
+        @if (state.lastSyncedAt) {
+          <span class="last-sync">Last sync: {{ state.lastSyncedAt | date: 'short' }}</span>
+        }
+
+        <span class="spacer"></span>
+
+        <button
+          type="button"
+          class="sync-btn"
+          [disabled]="state.isSyncing || !state.apiOnline"
+          (click)="onSync()"
+        >
+          <i class="fa-solid fa-rotate"></i>
+          {{ state.isSyncing ? 'Syncing…' : 'Sync Now' }}
+        </button>
+
+        @if (authService.currentUser; as user) {
+          <span class="user-label">{{ user.name }} ({{ user.role }})</span>
+        }
+
+        <button type="button" class="logout-btn" (click)="logout()">Logout</button>
+      }
+    </div>
+  </div>
+}

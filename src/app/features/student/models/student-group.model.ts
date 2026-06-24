@@ -4,4 +4,6 @@ export interface StudentGroup {
   description?: string;
   createdDate: string;
   isDefault?: boolean;
+  serverId?: number;
+  syncStatus?: 'pending' | 'synced';
 }

@@ -25,6 +25,10 @@ export function isMultilineColumn(column: DynamicColumn): boolean {
   return column.fieldType === 'multiline';
 }
 
+export function isSelectColumn(column: DynamicColumn): boolean {
+  return column.fieldType === 'select';
+}
+
 export function getColumnInputType(column: DynamicColumn): string {
   if (column.fieldType === 'phone') return 'tel';
   if (column.fieldType === 'number') return 'number';

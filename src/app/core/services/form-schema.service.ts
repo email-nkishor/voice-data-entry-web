@@ -154,18 +154,24 @@ export class FormSchemaService {
         ? row.allowVoiceEdit !== 0
         : defaultColumn?.allowVoiceEdit !== false;
 
+    const fieldType =
+      defaultColumn?.fieldType && isSystemField
+        ? defaultColumn.fieldType
+        : (row.fieldType as DynamicColumn['fieldType']);
+
     return {
       id: row.id,
       moduleCode: row.moduleCode,
       columnKey: row.columnKey,
       label: row.label,
       speechKeywords,
-      fieldType: row.fieldType as DynamicColumn['fieldType'],
+      fieldType,
       sortOrder: row.sortOrder,
       isLeadingField: row.isLeadingField === 1,
       isSystemField,
       allowDelete,
       allowVoiceEdit,
+      lookupKey: defaultColumn?.lookupKey,
     };
   }
 }

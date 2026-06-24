@@ -123,3 +123,11 @@
     grid-template-columns: 1fr;
   }
 }
+
+.delete-header-btn {
+  color: var(--color-danger) !important;
+
+  i {
+    color: var(--color-danger);
+  }
+}

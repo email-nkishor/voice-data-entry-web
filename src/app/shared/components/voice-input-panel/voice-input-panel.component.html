@@ -1,73 +1,105 @@
+@if (showEngineSelector) {
+  <app-speech-engine-selector />
+}
+
 <section class="voice-panel card">
   <h3>Voice Entry</h3>
-  <p class="hint free-note">
-    Speech uses your device or browser recognition (may need internet on some browsers). Field mapping is fully local and free.
-  </p>
 
-  <label class="field language-field">
-    <span>Language</span>
-    <select
-      [ngModel]="selectedLanguage"
-      (ngModelChange)="onLanguageChange($event)"
-      name="speechLanguage"
-    >
-      @for (language of languages; track language.code) {
-        <option [ngValue]="language.code">{{ language.label }}</option>
+  @if (perFieldMode) {
+    <p class="hint per-field-note">
+      <strong>Per-field mic mode</strong> — use the <i class="fa-solid fa-microphone"></i> button on each
+      form field below. Speak one value at a time for best accuracy.
+    </p>
+  } @else {
+    <p class="hint free-note">
+      @if (geminiMode) {
+        Browser captures speech; <strong>Gemini</strong> maps fields (API key required).
+      } @else if (whisperMode) {
+        <strong>Whisper</strong> transcribes recorded audio (OpenAI API key required).
+      } @else {
+        Speech uses browser recognition. Field mapping is local and free.
       }
-    </select>
-  </label>
+    </p>
 
-  <p class="hint">{{ hintText }}</p>
+    <label class="field language-field">
+      <span>Language</span>
+      <select
+        [ngModel]="selectedLanguage"
+        (ngModelChange)="onLanguageChange($event)"
+        name="speechLanguage"
+      >
+        @for (language of languages; track language.code) {
+          <option [ngValue]="language.code">{{ language.label }}</option>
+        }
+      </select>
+    </label>
 
-  @if (!speechSupported) {
-    <p class="warning">Speech recognition requires Chrome or Edge.</p>
-  }
+    <p class="hint">{{ hintText }}</p>
 
-  <div class="voice-actions">
-    <button
-      type="button"
-      class="btn btn-primary"
-      [class.btn-danger]="isListening"
-      [disabled]="!speechSupported"
-      (click)="onToggleListening()"
-    >
-      <i class="fa-solid fa-microphone"></i>
-      {{ isListening ? 'Stop Listening' : 'Start Speaking' }}
-      <i class="fa-solid fa-chevron-down"></i>
-    </button>
-    <button
-      type="button"
-      class="btn btn-outline"
-      [disabled]="!transcript"
-      (click)="onApplyTranscript()"
-    >
-      Apply
-    </button>
-    <button type="button" class="btn btn-outline" (click)="onReset()">Reset</button>
-  </div>
+    @if (!speechSupported && !whisperMode) {
+      <p class="warning">Speech recognition requires Chrome or Edge.</p>
+    }
 
-  <p class="hint modify-hint">
-    Use the <i class="fa-solid fa-microphone"></i> on each field to speak one value at a time, or use Start Speaking above for all fields together. Say <strong>reset</strong> / <strong>re entry</strong> to clear the form.
-  </p>
-
-  @if (isListening) {
-    <p class="listening">Listening... speak field keywords clearly, then tap Stop.</p>
-  }
-
-  @if (transcript) {
-    <p class="transcript"><strong>Heard:</strong> {{ transcript }}</p>
-  }
-
-  @if (parseWarning) {
-    <p class="warning">{{ parseWarning }}</p>
-  }
-
-  @if (getPreviewEntries().length > 0) {
-    <div class="preview">
-      <strong>Mapped fields:</strong>
-      @for (entry of getPreviewEntries(); track entry.key) {
-        <p>{{ entry.key }}: {{ entry.value }}</p>
-      }
+    <div class="voice-actions">
+      <button
+        type="button"
+        class="btn btn-primary"
+        [class.btn-danger]="isListening || isRecording"
+        [disabled]="(!speechSupported && !whisperMode) || isProcessing"
+        (click)="onToggleListening()"
+      >
+        <i class="fa-solid fa-microphone"></i>
+        @if (whisperMode) {
+          {{ isRecording ? 'Stop Recording' : 'Record & Transcribe' }}
+        } @else {
+          {{ isListening ? 'Stop Listening' : 'Start Speaking' }}
+        }
+      </button>
+      <button
+        type="button"
+        class="btn btn-outline"
+        [disabled]="!transcript || isProcessing"
+        (click)="onApplyTranscript()"
+      >
+        Apply
+      </button>
+      <button type="button" class="btn btn-outline" (click)="onReset()">Reset</button>
     </div>
+
+    <p class="hint modify-hint">
+      Speak field keywords clearly and pause between fields:
+      <strong>name</strong>, <strong>class</strong>, <strong>roll number</strong>, <strong>mobile</strong>,
+      <strong>address</strong>, <strong>admission number</strong>, <strong>parent name</strong>,
+      <strong>parent mobile</strong>, <strong>section</strong>.
+    </p>
+
+    @if (isListening) {
+      <p class="listening">Listening… speak field keywords clearly, then tap Stop.</p>
+    }
+
+    @if (statusMessage) {
+      <p class="listening">{{ statusMessage }}</p>
+    }
+
+    @if (isProcessing) {
+      <p class="listening">Processing…</p>
+    }
+
+    @if (transcript) {
+      <p class="transcript"><strong>Heard:</strong> {{ transcript }}</p>
+    }
+
+    @if (parseWarning) {
+      <p class="warning">{{ parseWarning }}</p>
+    }
+
+    @if (getPreviewEntries().length > 0) {
+      <div class="preview">
+        <strong>Mapped fields:</strong>
+        @for (entry of getPreviewEntries(); track entry.key) {
+          <p>{{ entry.key }}: {{ entry.value }}</p>
+        }
+      </div>
+    }
   }
 </section>

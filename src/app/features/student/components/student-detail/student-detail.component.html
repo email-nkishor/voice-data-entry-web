@@ -2,12 +2,24 @@
   <div class="student-detail-page">
     <app-module-action-header title="Student" backLink="/student/dashboard" [showDividerBeforeBack]="true">
       <div headerActions class="header-actions">
-        <a routerLink="/student/list" class="header-action-btn header-action-btn-outline">
+        <a routerLink="/student/list" class="header-btn-white">
           <i class="fa-solid fa-magnifying-glass"></i> Search Student
         </a>
-        <button type="button" class="header-action-btn header-action-btn-primary" (click)="onEdit()">
-          Edit Student
-        </button>
+        @if (canEdit) {
+          <button type="button" class="header-btn-white" (click)="onEdit()">
+            <i class="fa-solid fa-pen"></i> Edit Student
+          </button>
+        }
+        @if (canDelete) {
+          <button type="button" class="header-btn-white delete-header-btn" (click)="onDeleteRequest()">
+            <i class="fa-solid fa-trash"></i> Delete
+          </button>
+        }
+        @if (canApprove) {
+          <button type="button" class="action-btn" (click)="onApprove()">
+            <i class="fa-solid fa-check"></i> Approve Admission
+          </button>
+        }
       </div>
     </app-module-action-header>
 
@@ -16,7 +28,7 @@
         <p class="student-code">{{ studentCode }}</p>
         <h2>{{ student.name }}</h2>
       </div>
-      <span class="status-pill" [style.background]="getStatusColor()">{{ status }}</span>
+      <span class="status-pill" [style.background]="statusColor">{{ statusLabel }}</span>
     </div>
 
     <div class="detail-grid">
@@ -38,6 +50,30 @@
           <div>
             <dt>Mobile</dt>
             <dd>{{ student.mobile || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Admission No</dt>
+            <dd>{{ student.admissionNo || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Section</dt>
+            <dd>{{ student.section || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Academic Year</dt>
+            <dd>{{ student.academicYear || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Parent / Guardian</dt>
+            <dd>{{ student.parentName || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Parent Mobile</dt>
+            <dd>{{ student.parentMobile || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Fee Status</dt>
+            <dd>{{ student.feeStatus || '—' }}</dd>
           </div>
           <div class="full">
             <dt>Address</dt>
@@ -65,6 +101,8 @@
                 <small>{{ item.actionDate }} · {{ item.loggedDate }}</small>
               </div>
             </li>
+          } @empty {
+            <li><p class="empty">No activity yet.</p></li>
           }
         </ul>
       </aside>
@@ -75,4 +113,12 @@
       <a routerLink="/student/list">View All Students</a>
     </footer>
   </div>
+
+  @if (showDeleteDialog) {
+    <app-confirmation-dialog
+      message="Delete this student?"
+      (confirmed)="onDeleteConfirmed()"
+      (cancelled)="onDeleteCancelled()"
+    />
+  }
 }
