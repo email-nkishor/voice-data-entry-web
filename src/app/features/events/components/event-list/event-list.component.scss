@@ -1,0 +1,49 @@
+.toolbar {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-md);
+}
+
+.event-card {
+  padding: var(--space-md);
+}
+
+.event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+}
+
+.meta {
+  color: #666;
+  font-size: 0.8125rem;
+  margin: 0 0 var(--space-sm);
+}
+
+.desc {
+  font-size: 0.875rem;
+  margin: 0 0 var(--space-sm);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+}

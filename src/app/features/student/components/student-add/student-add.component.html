@@ -10,11 +10,20 @@
 
   <app-voice-dynamic-form
     [columns]="columns"
+    [moduleCode]="moduleCode"
     [formValues]="formValues"
     [validationErrors]="validationErrors"
     configureColumnsLink="/student/columns"
     [hideFormActions]="true"
     (save)="onSave()"
     (resetForm)="onReset()"
+  />
+
+  <app-custom-field-renderer
+    [definitions]="customFieldDefinitions"
+    [values]="customFieldValues"
+    [errors]="customFieldErrors"
+    title="Organization Custom Fields"
+    (valuesChange)="onCustomFieldsChange($event)"
   />
 </div>

@@ -1,0 +1,86 @@
+<section class="page">
+  <app-module-action-header title="Voice Entry History" backLink="/dashboard" />
+
+  @if (!canView) {
+    <p class="empty-state">You do not have permission to view voice entry history.</p>
+  } @else {
+    @if (stats) {
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-value">{{ stats.total }}</span>
+          <span class="stat-label">Total entries</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">{{ stats.recent30Days }}</span>
+          <span class="stat-label">Last 30 days</span>
+        </div>
+      </div>
+    }
+
+    <div class="filters card">
+      <input
+        type="search"
+        [(ngModel)]="search"
+        placeholder="Search transcript or extracted data…"
+        (keyup.enter)="load()"
+      />
+      <select [(ngModel)]="statusFilter">
+        <option value="">All statuses</option>
+        @for (status of statusOptions; track status) {
+          <option [value]="status">{{ status }}</option>
+        }
+      </select>
+      <input type="text" [(ngModel)]="moduleFilter" placeholder="Module code" />
+      <input type="date" [(ngModel)]="fromDate" />
+      <input type="date" [(ngModel)]="toDate" />
+      <button type="button" class="btn btn-primary" (click)="load()">
+        <i class="fa-solid fa-filter"></i> Apply
+      </button>
+      <button type="button" class="btn btn-outline" (click)="load()">
+        <i class="fa-solid fa-rotate"></i> Refresh
+      </button>
+    </div>
+
+    @if (loading) {
+      <p class="empty-state">Loading voice entries…</p>
+    } @else if (!entries.length) {
+      <p class="empty-state">No voice entries found.</p>
+    } @else {
+      <p class="result-count">{{ total }} entr{{ total === 1 ? 'y' : 'ies' }}</p>
+      <div class="entry-table card">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Student</th>
+              <th>Module</th>
+              <th>Transcript</th>
+              <th>Engine</th>
+              <th>Status</th>
+              <th>By</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (entry of entries; track entry.id) {
+              <tr>
+                <td>{{ formatDate(entry.createdAt) }}</td>
+                <td>{{ entry.studentName || '—' }}</td>
+                <td><code>{{ entry.moduleCode }}</code></td>
+                <td class="transcript-cell">{{ entry.transcriptPreview || entry.transcript }}</td>
+                <td>{{ entry.speechEngine || '—' }}</td>
+                <td>
+                  <span class="badge" [class]="statusClass(entry.status)">{{ entry.status }}</span>
+                </td>
+                <td>{{ entry.createdByName || '—' }}</td>
+                <td>
+                  <a [routerLink]="['/voice-history', entry.id]" class="btn btn-outline btn-sm">View</a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</section>

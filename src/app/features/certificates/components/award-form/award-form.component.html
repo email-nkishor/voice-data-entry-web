@@ -1,0 +1,62 @@
+<section class="page page-form">
+  <app-module-action-header
+    [title]="isRecommend ? 'Recommend Award' : 'Add Award'"
+    backLink="/certificates/awards"
+    [showSave]="true"
+    (save)="onSave()"
+  />
+
+  <form class="card form-grid" (ngSubmit)="onSave()">
+    <label>
+      <span>Student *</span>
+      <select [(ngModel)]="studentId" name="studentId" required>
+        <option [ngValue]="0">Select student</option>
+        @for (s of students; track s.id) {
+          <option [ngValue]="s.id">{{ s.name }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      <span>Category *</span>
+      <select [(ngModel)]="category" name="category">
+        @for (c of categories; track c) {
+          <option [value]="c">{{ c }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="full">
+      <span>Title *</span>
+      <input [(ngModel)]="title" name="title" required />
+    </label>
+
+    <label class="full">
+      <span>Description</span>
+      <textarea [(ngModel)]="description" name="description" rows="3"></textarea>
+    </label>
+
+    <label>
+      <span>Award Date</span>
+      <input type="date" [(ngModel)]="awardDate" name="awardDate" />
+    </label>
+
+    @if (!isRecommend) {
+      <label>
+        <span>Issued By</span>
+        <input [(ngModel)]="issuedBy" name="issuedBy" />
+      </label>
+    }
+
+    <label class="full">
+      <span>Attachment URL</span>
+      <input [(ngModel)]="attachmentUrl" name="attachmentUrl" />
+    </label>
+
+    <div class="form-actions full">
+      <button type="submit" class="btn btn-primary" [disabled]="saving">
+        {{ isRecommend ? 'Submit Recommendation' : 'Save Award' }}
+      </button>
+    </div>
+  </form>
+</section>

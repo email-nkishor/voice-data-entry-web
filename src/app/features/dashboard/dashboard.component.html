@@ -1,18 +1,77 @@
 <section class="page">
-  <app-module-action-header title="Voice Data Entry" [showBack]="false" />
+  <app-module-action-header title="Voice Data Entry" [showBack]="false" [showLogout]="true" />
 
-  <p class="intro">Select a module to begin offline data entry in your browser.</p>
+  <p class="intro">
+    @if (userName) {
+      Welcome, {{ userName }} ({{ userRole }}).
+      @if (parentPortalDisabled) {
+        The parent portal is not enabled for your school. Please contact the administrator.
+      } @else {
+        Select a module to begin.
+      }
+    } @else {
+      Select a module to begin offline data entry in your browser.
+    }
+  </p>
   <span class="badge"><i class="fa-solid fa-cloud-arrow-down"></i> Offline · IndexedDB</span>
+
+  <app-sync-bar />
 
   <app-speech-engine-selector />
 
-  <div class="card-grid">
-    @for (item of navItems; track item.route) {
-      <a [routerLink]="item.route" class="nav-card card">
-        <span class="icon"><i [class]="item.iconClass"></i></span>
-        <h2>{{ item.title }}</h2>
-        <p>{{ item.description }}</p>
-      </a>
-    }
-  </div>
+  @if (canViewReports && overview) {
+    <section class="kpi-strip card">
+      <div class="kpi-strip-header">
+        <h2>At a glance</h2>
+        <a routerLink="/reports" class="kpi-link">Full reports <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-item"><strong>{{ overview.kpis.totalStudents }}</strong><span>Students</span></div>
+        <div class="kpi-item"><strong>{{ overview.kpis.activeStudents }}</strong><span>Active</span></div>
+        <div class="kpi-item"><strong>{{ overview.kpis.voiceEntries }}</strong><span>Voice</span></div>
+        <div class="kpi-item"><strong>{{ overview.kpis.certificates }}</strong><span>Certificates</span></div>
+        <div class="kpi-item"><strong>{{ overview.kpis.awards }}</strong><span>Awards</span></div>
+        <div class="kpi-item"><strong>{{ overview.kpis.totalEvents }}</strong><span>Events</span></div>
+      </div>
+    </section>
+  }
+
+  @if (navSections.voice.length) {
+    <h2 class="section-title">Voice data entry modules</h2>
+    <div class="card-grid">
+      @for (item of navSections.voice; track item.route) {
+        <a [routerLink]="item.route" class="nav-card card">
+          <span class="icon"><i [class]="item.iconClass"></i></span>
+          <h2>{{ item.title }}</h2>
+          <p>{{ item.description }}</p>
+        </a>
+      }
+    </div>
+  }
+
+  @if (navSections.school.length) {
+    <h2 class="section-title">School management</h2>
+    <div class="card-grid">
+      @for (item of navSections.school; track item.route) {
+        <a [routerLink]="item.route" class="nav-card card">
+          <span class="icon"><i [class]="item.iconClass"></i></span>
+          <h2>{{ item.title }}</h2>
+          <p>{{ item.description }}</p>
+        </a>
+      }
+    </div>
+  }
+
+  @if (navSections.admin.length) {
+    <h2 class="section-title">Administration</h2>
+    <div class="card-grid">
+      @for (item of navSections.admin; track item.route) {
+        <a [routerLink]="item.route" class="nav-card card">
+          <span class="icon"><i [class]="item.iconClass"></i></span>
+          <h2>{{ item.title }}</h2>
+          <p>{{ item.description }}</p>
+        </a>
+      }
+    </div>
+  }
 </section>

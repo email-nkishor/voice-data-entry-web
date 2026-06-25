@@ -1,0 +1,27 @@
+<section class="page">
+  <app-module-action-header title="Verify Certificate" backLink="/certificates" />
+
+  <div class="card" style="padding:1.25rem; max-width:480px">
+    <label>
+      <span>Verification Code</span>
+      <input [(ngModel)]="code" placeholder="CERT-…" (keyup.enter)="verify()" />
+    </label>
+    <button type="button" class="btn btn-primary" style="margin-top:0.75rem" [disabled]="loading" (click)="verify()">
+      Verify
+    </button>
+
+    @if (result) {
+      <div class="verify-result" [class.valid]="result.valid" [class.invalid]="!result.valid">
+        <p><strong>{{ result.valid ? 'Valid' : 'Invalid' }}</strong> — {{ result.message }}</p>
+        @if (result.certificate) {
+          <dl>
+            <div><dt>Title</dt><dd>{{ result.certificate.title }}</dd></div>
+            <div><dt>Number</dt><dd><code>{{ result.certificate.certificateNumber }}</code></dd></div>
+            <div><dt>Student</dt><dd>{{ result.certificate.studentName }}</dd></div>
+            <div><dt>Status</dt><dd>{{ result.certificate.status }}</dd></div>
+          </dl>
+        }
+      </div>
+    }
+  </div>
+</section>

@@ -1,0 +1,15 @@
+.form-card {
+  padding: var(--space-lg);
+  max-width: 640px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+textarea {
+  width: 100%;
+  resize: vertical;
+}

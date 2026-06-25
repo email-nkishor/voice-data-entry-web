@@ -1,0 +1,106 @@
+@if (definitions.length) {
+  <section class="custom-fields card">
+    <h3>{{ title }}</h3>
+    <div class="fields-grid">
+      @for (def of definitions; track trackDef($index, def)) {
+        <label class="field" [class.has-error]="errors[def.fieldName]">
+          <span>
+            {{ def.fieldLabel }}
+            @if (def.isRequired) {
+              <em class="required">*</em>
+            }
+          </span>
+
+          @switch (def.fieldType) {
+            @case ('text') {
+              @if (readonly) {
+                <span class="readonly-value">{{ values[def.fieldName] || '—' }}</span>
+              } @else {
+                <input
+                  type="text"
+                  [ngModel]="values[def.fieldName]"
+                  (ngModelChange)="setValue(def.fieldName, $event)"
+                />
+              }
+            }
+            @case ('number') {
+              @if (readonly) {
+                <span class="readonly-value">{{ values[def.fieldName] ?? '—' }}</span>
+              } @else {
+                <input
+                  type="number"
+                  [ngModel]="values[def.fieldName]"
+                  (ngModelChange)="setValue(def.fieldName, $event)"
+                />
+              }
+            }
+            @case ('date') {
+              @if (readonly) {
+                <span class="readonly-value">{{ values[def.fieldName] || '—' }}</span>
+              } @else {
+                <input
+                  type="date"
+                  [ngModel]="values[def.fieldName]"
+                  (ngModelChange)="setValue(def.fieldName, $event)"
+                />
+              }
+            }
+            @case ('dropdown') {
+              @if (readonly) {
+                <span class="readonly-value">{{ values[def.fieldName] || '—' }}</span>
+              } @else {
+                <select
+                  [ngModel]="values[def.fieldName]"
+                  (ngModelChange)="setValue(def.fieldName, $event)"
+                >
+                  <option value="">Select…</option>
+                  @for (opt of def.validationRules.options ?? []; track opt.value) {
+                    <option [value]="opt.value">{{ opt.label }}</option>
+                  }
+                </select>
+              }
+            }
+            @case ('multiselect') {
+              @if (readonly) {
+                <span class="readonly-value">{{ displayValue(def) }}</span>
+              } @else {
+                <div class="checkbox-group">
+                  @for (opt of def.validationRules.options ?? []; track opt.value) {
+                    <label class="checkbox-item">
+                      <input
+                        type="checkbox"
+                        [checked]="isMultiselectChecked(def.fieldName, opt.value)"
+                        (change)="toggleMultiselect(def.fieldName, opt.value, $any($event.target).checked)"
+                      />
+                      {{ opt.label }}
+                    </label>
+                  }
+                </div>
+              }
+            }
+            @case ('boolean') {
+              @if (readonly) {
+                <span class="readonly-value">
+                  {{ values[def.fieldName] === true || values[def.fieldName] === 'true' ? 'Yes' : 'No' }}
+                </span>
+              } @else {
+                <label class="checkbox-item inline-bool">
+                  <input
+                    type="checkbox"
+                    [ngModel]="values[def.fieldName] === true || values[def.fieldName] === 'true'"
+                    (ngModelChange)="setValue(def.fieldName, $event)"
+                  />
+                  Yes
+                </label>
+              }
+            }
+          }
+
+          @if (errors[def.fieldName]) {
+            <small class="error">{{ errors[def.fieldName] }}</small>
+          }
+        </label>
+      }
+    </div>
+  </section>
+}

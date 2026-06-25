@@ -1,0 +1,63 @@
+<section class="page page-form">
+  <app-module-action-header title="Issue Certificate" backLink="/certificates" [showSave]="true" (save)="onSave()" />
+
+  <form class="card form-grid" (ngSubmit)="onSave()">
+    <label>
+      <span>Student *</span>
+      <select [(ngModel)]="studentId" name="studentId" required>
+        <option [ngValue]="0">Select student</option>
+        @for (s of students; track s.id) {
+          <option [ngValue]="s.id">{{ s.name }} ({{ s.rollNo }})</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      <span>Template</span>
+      <select [(ngModel)]="templateId" name="templateId" (change)="onTemplateChange()">
+        <option [ngValue]="null">None</option>
+        @for (t of templates; track t.id) {
+          <option [ngValue]="t.id">{{ t.name }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      <span>Certificate Type</span>
+      <select [(ngModel)]="certificateType" name="certificateType">
+        @for (t of types; track t) {
+          <option [value]="t">{{ t }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      <span>Title *</span>
+      <input [(ngModel)]="title" name="title" required />
+    </label>
+
+    <label class="full">
+      <span>Description</span>
+      <textarea [(ngModel)]="description" name="description" rows="3"></textarea>
+    </label>
+
+    <label>
+      <span>Issue Date *</span>
+      <input type="date" [(ngModel)]="issueDate" name="issueDate" required />
+    </label>
+
+    <label>
+      <span>Issued By *</span>
+      <input [(ngModel)]="issuedBy" name="issuedBy" required />
+    </label>
+
+    <label class="full">
+      <span>Attachment URL (PDF/Image)</span>
+      <input [(ngModel)]="attachmentUrl" name="attachmentUrl" placeholder="https://…" />
+    </label>
+
+    <div class="form-actions full">
+      <button type="submit" class="btn btn-primary" [disabled]="saving">Issue Certificate</button>
+    </div>
+  </form>
+</section>

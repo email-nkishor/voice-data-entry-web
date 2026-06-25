@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
+import { Organization } from '../models/organization.model';
 import { AuthUser, LoginResponse } from '../models/auth.model';
 import { ApiService } from './api.service';
+import { OrganizationService } from './organization.service';
 
 const TOKEN_KEY = 'vde_auth_token';
 const USER_KEY = 'vde_auth_user';
@@ -14,7 +16,8 @@ export class AuthService {
 
   constructor(
     private apiService: ApiService,
-    private router: Router
+    private router: Router,
+    private organizationService: OrganizationService
   ) {}
 
   get currentUser(): AuthUser | null {
@@ -31,7 +34,22 @@ export class AuthService {
 
   hasRole(...roles: AuthUser['role'][]): boolean {
     const user = this.currentUser;
-    return !!user && roles.includes(user.role);
+    if (!user) {
+      return false;
+    }
+    const normalized = user.role === 'admission_clerk' ? 'clerk' : user.role;
+    const expanded = roles.flatMap((r) =>
+      r === 'clerk' || r === 'admission_clerk' ? ['clerk', 'admission_clerk'] : [r]
+    );
+    return expanded.includes(user.role) || expanded.includes(normalized);
+  }
+
+  hasPermission(module: string, action: string): boolean {
+    const user = this.currentUser;
+    if (!user?.permissions) {
+      return false;
+    }
+    return user.permissions.some((p) => p.key === `${module}:${action}`);
   }
 
   async login(email: string, password: string): Promise<AuthUser> {
@@ -39,7 +57,39 @@ export class AuthService {
     localStorage.setItem(TOKEN_KEY, response.token);
     localStorage.setItem(USER_KEY, JSON.stringify(response.user));
     this.userSubject.next(response.user);
+
+    if (response.parentPortalEnabled !== undefined) {
+      const org: Organization = {
+        id: response.user.organizationId,
+        name: '',
+        code: '',
+        settings: {
+          parentPortalEnabled: response.parentPortalEnabled,
+          parentAttendanceEnabled: response.parentAttendanceEnabled,
+        },
+        parentPortalEnabled: response.parentPortalEnabled,
+        parentAttendanceEnabled: response.parentAttendanceEnabled,
+        createdAt: '',
+        updatedAt: '',
+      };
+      localStorage.setItem('vde_org_current', JSON.stringify(org));
+    } else {
+      try {
+        await this.organizationService.loadCurrent();
+      } catch {
+        // offline or API unavailable
+      }
+    }
+
     return response.user;
+  }
+
+  getPostLoginRoute(): string {
+    const user = this.currentUser;
+    if (user?.role === 'parent' && this.organizationService.isParentPortalEnabled()) {
+      return '/parent';
+    }
+    return '/dashboard';
   }
 
   logout(): void {

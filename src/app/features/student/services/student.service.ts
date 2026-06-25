@@ -87,7 +87,12 @@ export class StudentService {
       'update',
       `Student (${formatStudentCode(student.id!)}) updated`
     );
-    await this.syncQueueService.enqueue('student', 'update', record, student.id);
+    await this.syncQueueService.enqueue(
+      'student',
+      'update',
+      { ...record, serverId: student.serverId },
+      student.id
+    );
   }
 
   async delete(id: number): Promise<void> {

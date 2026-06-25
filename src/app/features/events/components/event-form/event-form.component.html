@@ -1,0 +1,53 @@
+<section class="page">
+  <app-module-action-header
+    [title]="eventId ? 'Edit Event' : 'Create Event'"
+    backLink="/events"
+    [showSave]="true"
+    (save)="save()"
+  />
+
+  <div class="card form-card">
+    <label class="field">
+      <span>Title *</span>
+      <input [(ngModel)]="form.title" type="text" />
+    </label>
+    <label class="field">
+      <span>Description</span>
+      <textarea [(ngModel)]="form.description" rows="3"></textarea>
+    </label>
+    <label class="field">
+      <span>Event Type</span>
+      <select [(ngModel)]="form.eventType">
+        @for (t of eventTypes; track t) {
+          <option [value]="t">{{ t }}</option>
+        }
+      </select>
+    </label>
+    <div class="row">
+      <label class="field">
+        <span>Start Date *</span>
+        <input [(ngModel)]="form.startDate" type="date" />
+      </label>
+      <label class="field">
+        <span>End Date</span>
+        <input [(ngModel)]="form.endDate" type="date" />
+      </label>
+    </div>
+    <label class="field">
+      <span>Location</span>
+      <input [(ngModel)]="form.location" type="text" />
+    </label>
+    <label class="field">
+      <span>Status</span>
+      <select [(ngModel)]="form.status">
+        <option value="draft">Draft</option>
+        <option value="published">Published</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </label>
+    <button type="button" class="btn btn-primary" [disabled]="saving" (click)="save()">
+      {{ saving ? 'Saving…' : 'Save Event' }}
+    </button>
+  </div>
+</section>

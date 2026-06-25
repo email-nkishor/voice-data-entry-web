@@ -35,6 +35,7 @@ const LANGUAGE_STORAGE_KEY = 'voice-entry-language';
 })
 export class VoiceDynamicFormComponent implements OnInit, OnDestroy {
   @Input() columns: DynamicColumn[] = [];
+  @Input() moduleCode = 'student';
   @Input() formValues: Record<string, string> = {};
   @Input() validationErrors: Record<string, string> = {};
   @Input() submitLabel = 'Save';

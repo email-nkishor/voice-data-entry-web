@@ -1,10 +1,16 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, KeyValuePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { CustomFieldService } from '../../../../core/services/custom-field.service';
+import { PermissionService } from '../../../../core/services/permission.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { ModuleActionHeaderComponent } from '../../../../shared/components/module-action-header/module-action-header.component';
 import { ConfirmationDialogComponent } from '../../../../shared/components/confirmation-dialog/confirmation-dialog.component';
+import { CustomFieldRendererComponent } from '../../../../shared/components/custom-field-renderer/custom-field-renderer.component';
+import {
+  CustomFieldDefinition,
+} from '../../../../core/models/custom-field.model';
 import {
   deriveStudentStatus,
   formatStudentCode,
@@ -12,13 +18,22 @@ import {
   STUDENT_STATUS_LABELS,
   Student,
 } from '../../models/student.model';
-import { StudentActivityService } from '../../services/student-activity.service';
+import { VoiceEntryService } from '../../../../core/services/voice-entry.service';
+import { VoiceEntryRecord } from '../../../../core/models/voice-entry.model';
+import { CertificateService } from '../../../../core/services/certificate.service';
+import { AwardService } from '../../../../core/services/award.service';
+import {
+  AwardRecord,
+  CertificateRecord,
+  StudentAchievementSummary,
+} from '../../../../core/models/certificate.model';
 import { StudentService } from '../../services/student.service';
+import { StudentActivityService } from '../../services/student-activity.service';
 
 @Component({
   selector: 'app-student-detail',
   standalone: true,
-  imports: [RouterLink, DatePipe, ModuleActionHeaderComponent, ConfirmationDialogComponent],
+  imports: [RouterLink, DatePipe, KeyValuePipe, ModuleActionHeaderComponent, ConfirmationDialogComponent, CustomFieldRendererComponent],
   templateUrl: './student-detail.component.html',
   styleUrl: './student-detail.component.scss',
 })
@@ -37,13 +52,28 @@ export class StudentDetailComponent implements OnInit {
     loggedDate: string;
   }[] = [];
   showDeleteDialog = false;
+  customFieldDefinitions: CustomFieldDefinition[] = [];
+  customFieldValues: Record<string, unknown> = {};
+  voiceEntries: VoiceEntryRecord[] = [];
+  certificates: CertificateRecord[] = [];
+  awards: AwardRecord[] = [];
+  achievementSummary: StudentAchievementSummary | null = null;
+  activeTab: 'overview' | 'certificates' | 'awards' | 'achievements' = 'overview';
+  canViewVoiceHistory = false;
+  canViewCertificates = false;
+  canViewAwards = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private studentService: StudentService,
+    private customFieldService: CustomFieldService,
+    private voiceEntryService: VoiceEntryService,
+    private certificateService: CertificateService,
+    private awardService: AwardService,
     private activityService: StudentActivityService,
     private authService: AuthService,
+    private permissionService: PermissionService,
     private toastService: ToastService
   ) {}
 
@@ -66,6 +96,9 @@ export class StudentDetailComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.studentCode = formatStudentCode(id);
+    this.canViewVoiceHistory = this.permissionService.canViewVoiceHistory();
+    this.canViewCertificates = this.permissionService.canViewCertificates();
+    this.canViewAwards = this.permissionService.canViewAwards();
 
     const existing = await this.studentService.getById(id);
     if (existing) {
@@ -73,6 +106,24 @@ export class StudentDetailComponent implements OnInit {
       const status = deriveStudentStatus(existing);
       this.statusLabel = STUDENT_STATUS_LABELS[status];
       this.statusColor = STUDENT_STATUS_COLORS[status];
+
+      this.customFieldDefinitions = await this.customFieldService.listDefinitions('student');
+      this.customFieldValues = await this.customFieldService.getValuesMap('student', id);
+
+      if (this.canViewVoiceHistory) {
+        this.voiceEntries = await this.voiceEntryService.getForStudent(id, 5);
+      }
+      if (this.canViewCertificates) {
+        this.certificates = await this.certificateService.getForStudent(id, 10);
+      }
+      if (this.canViewAwards) {
+        this.awards = await this.awardService.getForStudent(id, 10);
+        try {
+          this.achievementSummary = await this.awardService.getStudentSummary(id);
+        } catch {
+          this.achievementSummary = null;
+        }
+      }
     }
 
     const logs = await this.activityService.getRecent(10, id);
@@ -119,5 +170,17 @@ export class StudentDetailComponent implements OnInit {
 
   onDeleteCancelled(): void {
     this.showDeleteDialog = false;
+  }
+
+  formatVoiceDate(value: string): string {
+    return new Date(value).toLocaleString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  }
+
+  setTab(tab: 'overview' | 'certificates' | 'awards' | 'achievements'): void {
+    this.activeTab = tab;
   }
 }

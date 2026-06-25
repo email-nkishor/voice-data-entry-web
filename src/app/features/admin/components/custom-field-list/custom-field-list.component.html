@@ -1,0 +1,128 @@
+<section class="page">
+  <app-module-action-header title="Custom Fields" backLink="/admin/users" />
+
+  <p class="intro">
+    Define organization-specific student attributes. Fields apply to all students without code changes.
+  </p>
+
+  <div class="toolbar">
+    <button type="button" class="btn btn-primary" (click)="openForm()">
+      <i class="fa-solid fa-plus"></i> Add Field
+    </button>
+    <button type="button" class="btn btn-outline" (click)="loadDefinitions()">
+      <i class="fa-solid fa-rotate"></i> Refresh
+    </button>
+  </div>
+
+  @if (loading) {
+    <p class="empty-state">Loading…</p>
+  } @else if (!definitions.length) {
+    <p class="empty-state">No custom fields defined yet.</p>
+  } @else {
+    <div class="card table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Label</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Required</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (def of definitions; track def.id; let i = $index) {
+            <tr [class.inactive]="!def.isActive">
+              <td>
+                <button type="button" class="icon-btn" (click)="moveUp(i)" [disabled]="i === 0">↑</button>
+                <button type="button" class="icon-btn" (click)="moveDown(i)" [disabled]="i === definitions.length - 1">↓</button>
+              </td>
+              <td>{{ def.fieldLabel }}</td>
+              <td><code>{{ def.fieldName }}</code></td>
+              <td>{{ typeLabel(def.fieldType) }}</td>
+              <td>{{ def.isRequired ? 'Yes' : 'No' }}</td>
+              <td>{{ def.isActive ? 'Active' : 'Inactive' }}</td>
+              <td>
+                @if (def.isActive) {
+                  <button type="button" class="btn btn-danger btn-sm" (click)="deactivate(def)">
+                    Deactivate
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (showForm) {
+    <div class="dialog-backdrop" (click)="closeForm()">
+      <div class="card dialog" (click)="$event.stopPropagation()">
+        <h3>Add Custom Field</h3>
+        <label class="field">
+          <span>Field Label *</span>
+          <input [(ngModel)]="form.fieldLabel" type="text" placeholder="e.g. Blood Group" />
+        </label>
+        <label class="field">
+          <span>Field Type *</span>
+          <select [(ngModel)]="form.fieldType" (ngModelChange)="onTypeChange()">
+            @for (t of fieldTypes; track t.value) {
+              <option [value]="t.value">{{ t.label }}</option>
+            }
+          </select>
+        </label>
+        <label class="field checkbox-row">
+          <input [(ngModel)]="form.isRequired" type="checkbox" />
+          Required field
+        </label>
+        <label class="field">
+          <span>Default Value</span>
+          <input [(ngModel)]="form.defaultValue" type="text" />
+        </label>
+
+        @if (form.fieldType === 'text') {
+          <div class="row">
+            <label class="field">
+              <span>Min Length</span>
+              <input [(ngModel)]="form.validationRules!.minLength" type="number" />
+            </label>
+            <label class="field">
+              <span>Max Length</span>
+              <input [(ngModel)]="form.validationRules!.maxLength" type="number" />
+            </label>
+          </div>
+        }
+
+        @if (form.fieldType === 'number') {
+          <div class="row">
+            <label class="field">
+              <span>Min</span>
+              <input [(ngModel)]="form.validationRules!.min" type="number" />
+            </label>
+            <label class="field">
+              <span>Max</span>
+              <input [(ngModel)]="form.validationRules!.max" type="number" />
+            </label>
+          </div>
+        }
+
+        @if (form.fieldType === 'dropdown' || form.fieldType === 'multiselect') {
+          <label class="field">
+            <span>Options (one per line, optional value|label)</span>
+            <textarea [(ngModel)]="optionsText" rows="5" placeholder="general|General&#10;reserved|Reserved"></textarea>
+          </label>
+        }
+
+        <div class="dialog-actions">
+          <button type="button" class="btn btn-outline" (click)="closeForm()">Cancel</button>
+          <button type="button" class="btn btn-primary" [disabled]="saving" (click)="saveDefinition()">
+            {{ saving ? 'Saving…' : 'Create Field' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</section>

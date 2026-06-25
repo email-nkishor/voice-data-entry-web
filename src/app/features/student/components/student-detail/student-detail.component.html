@@ -31,6 +31,26 @@
       <span class="status-pill" [style.background]="statusColor">{{ statusLabel }}</span>
     </div>
 
+    @if (canViewCertificates || canViewAwards) {
+      <nav class="profile-tabs card">
+        <button type="button" [class.active]="activeTab === 'overview'" (click)="setTab('overview')">Overview</button>
+        @if (canViewCertificates) {
+          <button type="button" [class.active]="activeTab === 'certificates'" (click)="setTab('certificates')">
+            Certificates ({{ certificates.length }})
+          </button>
+        }
+        @if (canViewAwards) {
+          <button type="button" [class.active]="activeTab === 'awards'" (click)="setTab('awards')">
+            Awards ({{ awards.length }})
+          </button>
+          <button type="button" [class.active]="activeTab === 'achievements'" (click)="setTab('achievements')">
+            Achievements
+          </button>
+        }
+      </nav>
+    }
+
+    @if (activeTab === 'overview') {
     <div class="detail-grid">
       <section class="card detail-main">
         <h3>Student Information</h3>
@@ -88,9 +108,36 @@
             <dd>{{ student.syncStatus ?? 'pending' }}</dd>
           </div>
         </dl>
+
+        <app-custom-field-renderer
+          [definitions]="customFieldDefinitions"
+          [values]="customFieldValues"
+          [readonly]="true"
+          title="Organization Custom Fields"
+        />
       </section>
 
       <aside class="card detail-side">
+        @if (canViewVoiceHistory) {
+          <h3>Voice Entry History</h3>
+          <ul class="voice-entry-list">
+            @for (entry of voiceEntries; track entry.id) {
+              <li>
+                <a [routerLink]="['/voice-history', entry.id]">
+                  <strong>{{ formatVoiceDate(entry.createdAt) }}</strong>
+                  <span class="voice-preview">{{ entry.transcriptPreview || entry.transcript }}</span>
+                  <small>{{ entry.speechEngine || 'local' }} · {{ entry.status }}</small>
+                </a>
+              </li>
+            } @empty {
+              <li><p class="empty">No voice entries for this student.</p></li>
+            }
+          </ul>
+          @if (voiceEntries.length) {
+            <a routerLink="/voice-history" class="view-all-link">View all voice history →</a>
+          }
+        }
+
         <h3>Recent Activity</h3>
         <ul class="activity-list">
           @for (item of activities; track item.id) {
@@ -112,6 +159,83 @@
       <a routerLink="/student/dashboard">← Back to Student Dashboard</a>
       <a routerLink="/student/list">View All Students</a>
     </footer>
+    }
+
+    @if (activeTab === 'certificates' && canViewCertificates) {
+      <section class="card tab-panel">
+        <h3>Certificates</h3>
+        @if (!certificates.length) {
+          <p class="empty">No certificates for this student.</p>
+        } @else {
+          <ul class="achievement-list">
+            @for (cert of certificates; track cert.id) {
+              <li>
+                <a [routerLink]="['/certificates', cert.id]">
+                  <strong>{{ cert.title }}</strong>
+                  <span>{{ cert.certificateNumber }} · {{ cert.issueDate }}</span>
+                  <small>{{ cert.status }}</small>
+                </a>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+
+    @if (activeTab === 'awards' && canViewAwards) {
+      <section class="card tab-panel">
+        <h3>Awards</h3>
+        @if (!awards.length) {
+          <p class="empty">No awards for this student.</p>
+        } @else {
+          <ul class="achievement-list">
+            @for (award of awards; track award.id) {
+              <li>
+                <div>
+                  <strong>{{ award.title }}</strong>
+                  <span>{{ award.category }} · {{ award.awardDate }}</span>
+                  <small>{{ award.status }}</small>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+
+    @if (activeTab === 'achievements' && achievementSummary) {
+      <section class="card tab-panel achievement-summary">
+        <h3>Achievement Summary</h3>
+        <div class="summary-stats">
+          <div><span class="stat-num">{{ achievementSummary.totalCertificates }}</span><span>Certificates</span></div>
+          <div><span class="stat-num">{{ achievementSummary.totalAwards }}</span><span>Awards</span></div>
+        </div>
+        <div class="summary-breakdown">
+          <div>
+            <h4>By Certificate Type</h4>
+            @for (entry of achievementSummary.certificatesByType | keyvalue; track entry.key) {
+              <p>{{ entry.key }}: {{ entry.value }}</p>
+            } @empty {
+              <p class="empty">None yet</p>
+            }
+          </div>
+          <div>
+            <h4>By Award Category</h4>
+            @for (entry of achievementSummary.awardsByCategory | keyvalue; track entry.key) {
+              <p>{{ entry.key }}: {{ entry.value }}</p>
+            } @empty {
+              <p class="empty">None yet</p>
+            }
+          </div>
+        </div>
+      </section>
+    }
+
+    @if (activeTab !== 'overview') {
+    <footer class="detail-footer">
+      <a routerLink="/student/dashboard">← Back to Student Dashboard</a>
+    </footer>
+    }
   </div>
 
   @if (showDeleteDialog) {

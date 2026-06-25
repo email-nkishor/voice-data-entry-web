@@ -1,0 +1,55 @@
+<section class="page">
+  <app-module-action-header title="Attendance Reports" backLink="/attendance" />
+
+  <div class="card filters">
+    <label class="field">
+      <span>Group (optional)</span>
+      <select [(ngModel)]="groupId">
+        <option [ngValue]="null">All groups</option>
+        @for (g of groups; track g.id) {
+          <option [ngValue]="g.id">{{ g.name }}</option>
+        }
+      </select>
+    </label>
+    <label class="field">
+      <span>From</span>
+      <input [(ngModel)]="fromDate" type="date" />
+    </label>
+    <label class="field">
+      <span>To</span>
+      <input [(ngModel)]="toDate" type="date" />
+    </label>
+    <button type="button" class="btn btn-primary" (click)="loadSummary()">Generate</button>
+  </div>
+
+  @if (loading) {
+    <p class="empty-state">Loading…</p>
+  } @else if (summary) {
+    <div class="stats-grid">
+      <div class="card stat">
+        <span class="label">Total Records</span>
+        <strong>{{ summary.total }}</strong>
+      </div>
+      <div class="card stat present">
+        <span class="label">Present</span>
+        <strong>{{ summary.present }}</strong>
+      </div>
+      <div class="card stat absent">
+        <span class="label">Absent</span>
+        <strong>{{ summary.absent }}</strong>
+      </div>
+      <div class="card stat">
+        <span class="label">Late</span>
+        <strong>{{ summary.late }}</strong>
+      </div>
+      <div class="card stat">
+        <span class="label">Excused</span>
+        <strong>{{ summary.excused }}</strong>
+      </div>
+      <div class="card stat highlight">
+        <span class="label">Attendance %</span>
+        <strong>{{ summary.percentage }}%</strong>
+      </div>
+    </div>
+  }
+</section>

@@ -1,0 +1,237 @@
+<section class="page reports-page">
+  <app-module-action-header title="Reports & Analytics" backLink="/dashboard" />
+
+  @if (!canView) {
+    <p class="empty">You do not have permission to view reports.</p>
+  } @else {
+    <div class="filters card">
+      <label>
+        <span>From</span>
+        <input type="date" [(ngModel)]="fromDate" />
+      </label>
+      <label>
+        <span>To</span>
+        <input type="date" [(ngModel)]="toDate" />
+      </label>
+      <label>
+        <span>Group</span>
+        <select [(ngModel)]="groupId">
+          <option [ngValue]="null">All groups</option>
+          @for (g of groups; track g.id) {
+            <option [ngValue]="g.id">{{ g.name }}</option>
+          }
+        </select>
+      </label>
+      <button type="button" class="btn btn-primary" (click)="load()">Apply</button>
+      <button type="button" class="btn btn-outline" (click)="load()"><i class="fa-solid fa-rotate"></i></button>
+    </div>
+
+    <nav class="module-tabs card">
+      @for (m of modules; track m.id) {
+        <button type="button" [class.active]="activeModule === m.id" (click)="setModule(m.id)">
+          {{ m.label }}
+        </button>
+      }
+    </nav>
+
+    @if (loading) {
+      <p class="empty">Loading analytics…</p>
+    } @else if (overview) {
+      <div class="kpi-grid">
+        <article class="kpi-card card">
+          <span class="kpi-value">{{ overview.kpis.totalStudents }}</span>
+          <span class="kpi-label">Total Students</span>
+        </article>
+        <article class="kpi-card card">
+          <span class="kpi-value">{{ overview.kpis.activeStudents }}</span>
+          <span class="kpi-label">Active Students</span>
+        </article>
+        <article class="kpi-card card">
+          <span class="kpi-value">{{ overview.kpis.totalGroups }}</span>
+          <span class="kpi-label">Groups</span>
+        </article>
+        <article class="kpi-card card">
+          <span class="kpi-value">{{ overview.kpis.totalEvents }}</span>
+          <span class="kpi-label">Events</span>
+        </article>
+        <article class="kpi-card card">
+          <span class="kpi-value">{{ overview.kpis.voiceEntries }}</span>
+          <span class="kpi-label">Voice Entries</span>
+        </article>
+        <article class="kpi-card card">
+          <span class="kpi-value">{{ overview.kpis.certificates }}</span>
+          <span class="kpi-label">Certificates</span>
+        </article>
+        <article class="kpi-card card">
+          <span class="kpi-value">{{ overview.kpis.awards }}</span>
+          <span class="kpi-label">Awards</span>
+        </article>
+      </div>
+
+      @if (activeModule === 'overview') {
+        <div class="dashboard-grid">
+          <section class="card chart-panel">
+            <h3>Voice Entry Trend</h3>
+            <div class="bar-chart">
+              @for (point of overview.trends.voiceEntries; track point.date) {
+                <div class="bar-row">
+                  <span class="bar-label">{{ formatDate(point.date) }}</span>
+                  <div class="bar-track">
+                    <div class="bar-fill voice" [style.width]="barWidth(point.count, trendMax(overview.trends.voiceEntries))"></div>
+                  </div>
+                  <span class="bar-count">{{ point.count }}</span>
+                </div>
+              } @empty {
+                <p class="empty">No voice data in range</p>
+              }
+            </div>
+          </section>
+
+          <section class="card chart-panel">
+            <h3>Certificate Trend</h3>
+            <div class="bar-chart">
+              @for (point of overview.trends.certificates; track point.date) {
+                <div class="bar-row">
+                  <span class="bar-label">{{ formatDate(point.date) }}</span>
+                  <div class="bar-track">
+                    <div class="bar-fill cert" [style.width]="barWidth(point.count, trendMax(overview.trends.certificates))"></div>
+                  </div>
+                  <span class="bar-count">{{ point.count }}</span>
+                </div>
+              } @empty {
+                <p class="empty">No certificate data in range</p>
+              }
+            </div>
+          </section>
+
+          <section class="card breakdown-panel">
+            <h3>Student Status</h3>
+            @for (entry of overview.breakdowns.studentsByStatus | keyvalue; track entry.key) {
+              <div class="breakdown-row">
+                <span>{{ entry.key }}</span>
+                <strong>{{ entry.value }}</strong>
+              </div>
+            }
+          </section>
+
+          <section class="card breakdown-panel">
+            <h3>Awards by Category</h3>
+            @for (entry of overview.breakdowns.awardsByCategory | keyvalue; track entry.key) {
+              <div class="breakdown-row">
+                <span>{{ entry.key }}</span>
+                <strong>{{ entry.value }}</strong>
+              </div>
+            }
+          </section>
+
+          <section class="card activity-panel">
+            <h3>Recent Activity</h3>
+            <ul class="activity-list">
+              @for (item of overview.recentActivity; track item.id) {
+                <li>
+                  <strong>{{ item.title }}</strong>
+                  <span>{{ item.description }}</span>
+                  <small>{{ formatDate(item.occurredAt) }}</small>
+                </li>
+              } @empty {
+                <li class="empty">No recent activity</li>
+              }
+            </ul>
+          </section>
+
+          <section class="card quick-actions">
+            <h3>Quick Actions</h3>
+            <div class="action-grid">
+              @for (action of overview.quickActions; track action.route) {
+                <a [routerLink]="action.route" class="action-card">
+                  <i class="fa-solid" [class]="action.icon"></i>
+                  {{ action.label }}
+                </a>
+              }
+            </div>
+          </section>
+        </div>
+      } @else if (moduleData) {
+        <div class="dashboard-grid">
+          <section class="card module-detail">
+            <h3>{{ moduleLabel(activeModule) }} Analytics</h3>
+            @if (moduleData['total'] !== undefined) {
+              <p class="total-line">
+                Total: <strong>{{ moduleData['total'] }}</strong>
+                @if (moduleData['active'] !== undefined) {
+                  · Active: <strong>{{ moduleData['active'] }}</strong>
+                }
+                @if (moduleData['issued'] !== undefined) {
+                  · Issued: <strong>{{ moduleData['issued'] }}</strong>
+                }
+                @if (moduleData['revoked'] !== undefined) {
+                  · Revoked: <strong>{{ moduleData['revoked'] }}</strong>
+                }
+              </p>
+            }
+            @if (moduleData['trend']) {
+              <div class="bar-chart compact">
+                @for (point of $any(moduleData['trend']); track point.date) {
+                  <div class="bar-row">
+                    <span class="bar-label">{{ formatDate(point.date) }}</span>
+                    <div class="bar-track">
+                      <div class="bar-fill" [style.width]="barWidth(point.count, trendMax($any(moduleData['trend'])))"></div>
+                    </div>
+                    <span class="bar-count">{{ point.count }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </section>
+
+          @for (panel of moduleBreakdowns(); track panel.label) {
+            <section class="card breakdown-panel">
+              <h3>{{ panel.label }}</h3>
+              @for (entry of panel.data | keyvalue; track entry.key) {
+                <div class="breakdown-row">
+                  <span>{{ entry.key }}</span>
+                  <strong>{{ entry.value }}</strong>
+                </div>
+              }
+            </section>
+          }
+
+          @if (moduleRecent().length) {
+            <section class="card activity-panel">
+              <h3>{{ activeModule === 'events' ? 'Upcoming' : 'Recent' }}</h3>
+              <ul class="activity-list">
+                @for (item of moduleRecent(); track item['id']) {
+                  <li>
+                    <strong>{{ recentTitle(item) }}</strong>
+                    @if (recentMeta(item)) {
+                      <span>{{ recentMeta(item) }}</span>
+                    }
+                    @if (recentDate(item)) {
+                      <small>{{ recentDate(item) }}</small>
+                    }
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+        </div>
+      }
+
+      <section class="card export-panel">
+        <h3>Export Center</h3>
+        <p class="hint">Download scoped data for the selected date range (UTF-8 CSV / Excel-compatible).</p>
+        <div class="export-grid">
+          @for (entity of exportEntities; track entity) {
+            <div class="export-item">
+              <span>{{ entity }}</span>
+              <button type="button" class="btn btn-outline btn-sm" [disabled]="exporting" (click)="exportEntity(entity, 'csv')">CSV</button>
+              <button type="button" class="btn btn-outline btn-sm" [disabled]="exporting" (click)="exportEntity(entity, 'excel')">Excel</button>
+            </div>
+          }
+        </div>
+      </section>
+
+      <p class="meta">Scope: {{ overview.scope }} · Generated {{ formatDate(overview.generatedAt) }}</p>
+    }
+  }
+</section>

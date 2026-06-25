@@ -1,0 +1,48 @@
+<section class="page">
+  <app-module-action-header title="Events" backLink="/dashboard" />
+
+  <div class="toolbar">
+    @if (canCreate) {
+      <a routerLink="/events/add" class="btn btn-primary">
+        <i class="fa-solid fa-plus"></i> Create Event
+      </a>
+    }
+    <button type="button" class="btn btn-outline" (click)="loadEvents()">
+      <i class="fa-solid fa-rotate"></i> Refresh
+    </button>
+  </div>
+
+  @if (loading) {
+    <p class="empty-state">Loading events…</p>
+  } @else if (!events.length) {
+    <p class="empty-state">No events yet.</p>
+  } @else {
+    <div class="card-grid">
+      @for (event of events; track event.id) {
+        <article class="card event-card">
+          <div class="event-header">
+            <h3>{{ event.title }}</h3>
+            <span class="badge">{{ event.status }}</span>
+          </div>
+          <p class="meta">
+            <i class="fa-solid fa-calendar"></i> {{ formatDate(event.startDate) }}
+            @if (event.location) {
+              · <i class="fa-solid fa-location-dot"></i> {{ event.location }}
+            }
+          </p>
+          @if (event.description) {
+            <p class="desc">{{ event.description }}</p>
+          }
+          <div class="actions">
+            @if (canCreate) {
+              <a [routerLink]="['/events/edit', event.id]" class="btn btn-outline btn-sm">Edit</a>
+              <button type="button" class="btn btn-danger btn-sm" (click)="deleteEvent(event)">
+                Delete
+              </button>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>

@@ -1,0 +1,84 @@
+<section class="page">
+  <app-module-action-header title="User Management" backLink="/dashboard" />
+
+  <div class="toolbar">
+    <button type="button" class="btn btn-primary" (click)="openForm()">
+      <i class="fa-solid fa-user-plus"></i> Add User
+    </button>
+    <a routerLink="/admin/custom-fields" class="btn btn-outline">
+      <i class="fa-solid fa-sliders"></i> Custom Fields
+    </a>
+    <button type="button" class="btn btn-outline" (click)="loadUsers()">
+      <i class="fa-solid fa-rotate"></i> Refresh
+    </button>
+  </div>
+
+  @if (loading) {
+    <p class="empty-state">Loading users…</p>
+  } @else if (!users.length) {
+    <p class="empty-state">No users found.</p>
+  } @else {
+    <div class="card table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users; track user.id) {
+            <tr>
+              <td>{{ user.name }}</td>
+              <td>{{ user.email }}</td>
+              <td><span class="badge">{{ roleLabel(user.role) }}</span></td>
+              <td>{{ user.status }}</td>
+              <td>
+                <button type="button" class="btn btn-danger btn-sm" (click)="deleteUser(user)">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (showForm) {
+    <div class="dialog-backdrop" (click)="closeForm()">
+      <div class="card dialog" (click)="$event.stopPropagation()">
+        <h3>Add User</h3>
+        <label class="field">
+          <span>Name</span>
+          <input [(ngModel)]="form.name" type="text" />
+        </label>
+        <label class="field">
+          <span>Email</span>
+          <input [(ngModel)]="form.email" type="email" />
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input [(ngModel)]="form.password" type="password" />
+        </label>
+        <label class="field">
+          <span>Role</span>
+          <select [(ngModel)]="form.role">
+            @for (r of roles; track r.value) {
+              <option [value]="r.value">{{ r.label }}</option>
+            }
+          </select>
+        </label>
+        <div class="dialog-actions">
+          <button type="button" class="btn btn-outline" (click)="closeForm()">Cancel</button>
+          <button type="button" class="btn btn-primary" [disabled]="saving" (click)="saveUser()">
+            {{ saving ? 'Saving…' : 'Create User' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</section>

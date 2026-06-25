@@ -31,6 +31,14 @@ export class ApiService {
     );
   }
 
+  download(path: string): Promise<Blob> {
+    const token = localStorage.getItem('vde_auth_token');
+    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
+    return firstValueFrom(
+      this.http.get(`${environment.apiUrl}${path}`, { headers, responseType: 'blob' })
+    );
+  }
+
   async healthCheck(): Promise<boolean> {
     try {
       await firstValueFrom(

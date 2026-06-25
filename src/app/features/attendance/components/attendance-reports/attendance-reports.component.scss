@@ -1,0 +1,34 @@
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+  align-items: end;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-md);
+}
+
+.stat {
+  padding: var(--space-md);
+  text-align: center;
+
+  .label {
+    display: block;
+    font-size: 0.75rem;
+    color: #666;
+    margin-bottom: var(--space-xs);
+  }
+
+  strong {
+    font-size: 1.5rem;
+  }
+
+  &.present strong { color: #388e3c; }
+  &.absent strong { color: #d32f2f; }
+  &.highlight strong { color: #1976d2; }
+}

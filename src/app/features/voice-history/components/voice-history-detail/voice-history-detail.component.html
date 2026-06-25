@@ -1,0 +1,93 @@
+<section class="page">
+  <app-module-action-header title="Voice Entry Detail" backLink="/voice-history" />
+
+  @if (loading) {
+    <p class="empty-state">Loading…</p>
+  } @else if (entry) {
+    <div class="meta-grid card">
+      <div>
+        <span class="label">Student</span>
+        <strong>{{ entry.studentName || '—' }}</strong>
+      </div>
+      <div>
+        <span class="label">Module</span>
+        <strong><code>{{ entry.moduleCode }}</code></strong>
+      </div>
+      <div>
+        <span class="label">Status</span>
+        <strong>{{ entry.status }}</strong>
+      </div>
+      <div>
+        <span class="label">Speech engine</span>
+        <strong>{{ entry.speechEngine || '—' }}</strong>
+      </div>
+      <div>
+        <span class="label">Created</span>
+        <strong>{{ formatDate(entry.createdAt) }}</strong>
+      </div>
+      <div>
+        <span class="label">Created by</span>
+        <strong>{{ entry.createdByName || '—' }}</strong>
+      </div>
+    </div>
+
+    <section class="card">
+      <h3>Original Transcript</h3>
+      <p class="transcript">{{ entry.transcript }}</p>
+    </section>
+
+    <section class="card">
+      <h3>Processed JSON</h3>
+      @if (entry.processedJson && (entry.processedJson | keyvalue).length) {
+        <table class="json-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of entry.processedJson | keyvalue; track row.key) {
+              <tr>
+                <td><code>{{ row.key }}</code></td>
+                <td>{{ row.value }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="empty-state">No extracted fields recorded.</p>
+      }
+    </section>
+
+    <section class="card">
+      <h3>Edit History</h3>
+      @if (edits.length) {
+        <table class="edit-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Old value</th>
+              <th>New value</th>
+              <th>Edited by</th>
+              <th>When</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (edit of edits; track edit.id) {
+              <tr>
+                <td><code>{{ edit.fieldName }}</code></td>
+                <td>{{ parseEditValue(edit.oldValue) }}</td>
+                <td>{{ parseEditValue(edit.newValue) }}</td>
+                <td>{{ edit.editedByName || '—' }}</td>
+                <td>{{ formatDate(edit.editedAt) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="empty-state">No field-level edits recorded.</p>
+      }
+    </section>
+  }
+</section>

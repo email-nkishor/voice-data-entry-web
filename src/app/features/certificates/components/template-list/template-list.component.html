@@ -1,0 +1,24 @@
+<section class="page">
+  <app-module-action-header title="Certificate Templates" backLink="/certificates" />
+
+  @if (loading) {
+    <p>Loading…</p>
+  } @else if (!templates.length) {
+    <p>No templates configured.</p>
+  } @else {
+    <div class="card-grid">
+      @for (t of templates; track t.id) {
+        <article class="card" style="padding:1rem">
+          <h3>{{ t.name }}</h3>
+          <p>{{ t.certificateType }} · {{ t.isActive ? 'Active' : 'Inactive' }}</p>
+          @if (t.description) {
+            <p>{{ t.description }}</p>
+          }
+          @if (t.templateUrl) {
+            <a [href]="t.templateUrl" target="_blank" rel="noopener">View template file</a>
+          }
+        </article>
+      }
+    </div>
+  }
+</section>

@@ -1,0 +1,9 @@
+.detail { padding: 1.25rem; }
+.header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+dt { font-size: 0.75rem; text-transform: uppercase; color: var(--muted, #6b7280); }
+dd { margin: 0.25rem 0 0; }
+.full { grid-column: 1 / -1; }
+.badge { padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem; }
+.status-issued { background: #dcfce7; }
+.status-revoked { background: #fee2e2; }

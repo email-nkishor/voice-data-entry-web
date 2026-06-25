@@ -12,7 +12,9 @@ import { AttendanceService } from '../../services/attendance.service';
     <div class="page">
       <app-module-action-header title="Attendance" backLink="/dashboard" />
       <div class="toolbar">
-        <a routerLink="/attendance/entry" class="btn btn-primary">Mark Attendance</a>
+        <a routerLink="/attendance/daily" class="btn btn-primary">Daily Grid</a>
+        <a routerLink="/attendance/entry" class="btn btn-outline">Voice Entry</a>
+        <a routerLink="/attendance/reports" class="btn btn-outline">Reports</a>
       </div>
       <div class="list">
         @for (record of records; track record.id) {
@@ -30,6 +32,6 @@ export class AttendanceListComponent implements OnInit {
   records: AttendanceWithStudent[] = [];
   constructor(private attendanceService: AttendanceService) {}
   async ngOnInit(): Promise<void> {
-    this.records = await this.attendanceService.getAll();
+    this.records = await this.attendanceService.getAllLocal();
   }
 }

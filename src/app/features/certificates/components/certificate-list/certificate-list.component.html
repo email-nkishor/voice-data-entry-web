@@ -1,0 +1,63 @@
+<section class="page">
+  <app-module-action-header title="Certificates & Awards" backLink="/dashboard" />
+
+  <div class="toolbar">
+    @if (canCreate) {
+      <a routerLink="/certificates/issue" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Issue Certificate</a>
+      <a routerLink="/certificates/awards/add" class="btn btn-outline"><i class="fa-solid fa-trophy"></i> Add Award</a>
+    }
+    <a routerLink="/certificates/awards" class="btn btn-outline">Awards</a>
+    <a routerLink="/certificates/verify" class="btn btn-outline">Verify</a>
+    @if (canManageTemplates) {
+      <a routerLink="/certificates/templates" class="btn btn-outline">Templates</a>
+    }
+    <button type="button" class="btn btn-outline" (click)="load()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+  </div>
+
+  <div class="filters card">
+    <input type="search" [(ngModel)]="search" placeholder="Search certificates…" (keyup.enter)="load()" />
+    <select [(ngModel)]="statusFilter" (change)="load()">
+      <option value="">All statuses</option>
+      <option value="issued">Issued</option>
+      <option value="draft">Draft</option>
+      <option value="revoked">Revoked</option>
+    </select>
+    <button type="button" class="btn btn-primary" (click)="load()">Apply</button>
+  </div>
+
+  @if (loading) {
+    <p class="empty">Loading…</p>
+  } @else if (!certificates.length) {
+    <p class="empty">No certificates found.</p>
+  } @else {
+    <p class="count">{{ total }} certificate(s)</p>
+    <div class="table card">
+      <table>
+        <thead>
+          <tr>
+            <th>Number</th>
+            <th>Title</th>
+            <th>Student</th>
+            <th>Type</th>
+            <th>Issue Date</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cert of certificates; track cert.id) {
+            <tr>
+              <td><code>{{ cert.certificateNumber }}</code></td>
+              <td>{{ cert.title }}</td>
+              <td>{{ cert.studentName || cert.studentId }}</td>
+              <td>{{ cert.certificateType }}</td>
+              <td>{{ formatDate(cert.issueDate) }}</td>
+              <td><span class="badge status-{{ cert.status }}">{{ cert.status }}</span></td>
+              <td><a [routerLink]="['/certificates', cert.id]" class="btn btn-outline btn-sm">View</a></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

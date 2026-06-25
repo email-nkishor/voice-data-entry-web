@@ -1,0 +1,120 @@
+<section class="parent-dashboard">
+  @if (loading) {
+    <p class="empty">Loading dashboard…</p>
+  } @else if (dashboard) {
+    @if (dashboard.children.length > 1) {
+      <label class="child-filter card">
+        <span>View dashboard for</span>
+        <select
+          [value]="dashboard.selectedStudentId ?? ''"
+          (change)="onChildChange(+$any($event.target).value)"
+        >
+          @for (child of dashboard.children; track child.studentId) {
+            <option [value]="child.studentId">{{ child.name }}</option>
+          }
+        </select>
+      </label>
+    }
+
+    <div class="kpi-grid">
+      <article class="kpi card"><strong>{{ dashboard.childrenCount }}</strong><span>Children</span></article>
+      <article class="kpi card"><strong>{{ dashboard.achievementSummary.certificates }}</strong><span>Certificates</span></article>
+      <article class="kpi card"><strong>{{ dashboard.achievementSummary.awards }}</strong><span>Awards</span></article>
+      <article class="kpi card"><strong>{{ dashboard.achievementSummary.voiceEntries }}</strong><span>Voice Entries</span></article>
+      <article class="kpi card"><strong>{{ dashboard.achievementSummary.eventsParticipated }}</strong><span>Events</span></article>
+    </div>
+
+    @if (dashboard.attendanceComingSoon) {
+      <div class="coming-soon card">
+        <i class="fa-solid fa-clipboard-check"></i>
+        <div>
+          <strong>Attendance</strong>
+          <p>Attendance views for parents are disabled by your school administrator.</p>
+        </div>
+      </div>
+    } @else if (dashboard.parentAttendanceEnabled && dashboard.attendanceSummary) {
+      <section class="attendance-widget card">
+        <div class="widget-header">
+          <h3>Attendance (30 days)</h3>
+          @if (dashboard.absenceAlertCount) {
+            <span class="alert-pill">{{ dashboard.absenceAlertCount }} absence alert(s)</span>
+          }
+        </div>
+        <div class="attendance-kpis">
+          <span><strong>{{ dashboard.attendanceSummary.percentage }}%</strong> present</span>
+          <span>{{ dashboard.attendanceSummary.absent }} absent</span>
+          <span>{{ dashboard.attendanceSummary.late }} late</span>
+        </div>
+        @if (dashboard.recentAbsences?.length) {
+          <ul class="absence-list">
+            @for (row of $any(dashboard.recentAbsences); track row.id) {
+              <li>{{ formatDate(row.attendanceDate) }} · {{ row.status }}</li>
+            }
+          </ul>
+        }
+        @if (dashboard.selectedStudentId) {
+          <a class="view-link" [routerLink]="['/parent/child', dashboard.selectedStudentId, 'attendance']">
+            View full attendance
+          </a>
+        }
+      </section>
+    }
+
+    <div class="panels">
+      <section class="card">
+        <h3>Upcoming Events</h3>
+        <ul>
+          @for (event of $any(dashboard.upcomingEvents); track event.id) {
+            <li><strong>{{ event.title }}</strong> · {{ formatDate(event.startDate) }}</li>
+          } @empty {
+            <li class="empty">No upcoming events</li>
+          }
+        </ul>
+      </section>
+
+      <section class="card">
+        <h3>Recent Certificates</h3>
+        <ul>
+          @for (cert of $any(dashboard.recentCertificates); track cert.id) {
+            <li><strong>{{ cert.title }}</strong> · {{ formatDate(cert.issueDate) }}</li>
+          } @empty {
+            <li class="empty">No certificates yet</li>
+          }
+        </ul>
+      </section>
+
+      <section class="card">
+        <h3>Recent Awards</h3>
+        <ul>
+          @for (award of $any(dashboard.recentAwards); track award.id) {
+            <li><strong>{{ award.title }}</strong> · {{ formatDate(award.awardDate) }}</li>
+          } @empty {
+            <li class="empty">No awards yet</li>
+          }
+        </ul>
+      </section>
+
+      <section class="card">
+        <h3>Recent Voice Entries</h3>
+        <ul>
+          @for (entry of $any(dashboard.recentVoiceEntries); track entry.id) {
+            <li><strong>{{ entry.moduleCode }}</strong> · {{ formatDate(entry.createdAt) }}</li>
+          } @empty {
+            <li class="empty">No voice entries</li>
+          }
+        </ul>
+      </section>
+    </div>
+
+    @if (dashboard.selectedStudentId) {
+      <div class="quick-links card">
+        <a [routerLink]="['/parent/child', dashboard.selectedStudentId, 'profile']">View Profile</a>
+        <a [routerLink]="['/parent/child', dashboard.selectedStudentId, 'certificates']">Certificates</a>
+        <a [routerLink]="['/parent/child', dashboard.selectedStudentId, 'awards']">Awards</a>
+        @if (dashboard.parentAttendanceEnabled) {
+          <a [routerLink]="['/parent/child', dashboard.selectedStudentId, 'attendance']">Attendance</a>
+        }
+      </div>
+    }
+  }
+</section>

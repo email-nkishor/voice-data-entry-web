@@ -1,0 +1,42 @@
+<section class="child-page card">
+  @if (loading) {
+    <p class="empty">Loading profile…</p>
+  } @else if (profile) {
+    <h2>{{ profile['name'] }}</h2>
+    <p class="meta">{{ profile['class'] }} · Section {{ profile['section'] || '—' }} · {{ profile['status'] }}</p>
+
+    <div class="grid">
+      <div><span>Roll No</span><strong>{{ profile['rollNo'] }}</strong></div>
+      <div><span>Admission No</span><strong>{{ profile['admissionNo'] || '—' }}</strong></div>
+      <div><span>Academic Year</span><strong>{{ profile['academicYear'] || '—' }}</strong></div>
+      <div><span>Fee Status</span><strong>{{ profile['feeStatus'] }}</strong></div>
+      <div><span>Mobile</span><strong>{{ profile['mobile'] || '—' }}</strong></div>
+      <div><span>Address</span><strong>{{ profile['address'] || '—' }}</strong></div>
+    </div>
+
+    @if ($any(profile['primaryGroup'])) {
+      <h3>Primary Group</h3>
+      <p>{{ $any(profile['primaryGroup']).name }}</p>
+    }
+
+    @if ($any(profile['groups'])?.length) {
+      <h3>Groups</h3>
+      <ul>
+        @for (g of $any(profile['groups']); track g.id) {
+          <li>{{ g.name }}</li>
+        }
+      </ul>
+    }
+
+    @if ($any(profile['customFields'])?.length) {
+      <h3>Custom Fields</h3>
+      <div class="custom-grid">
+        @for (field of $any(profile['customFields']); track field.fieldDefinitionId) {
+          <div><span>{{ field.fieldLabel || field.fieldName }}</span><strong>{{ field.value ?? '—' }}</strong></div>
+        }
+      </div>
+    }
+
+    <p class="readonly-badge"><i class="fa-solid fa-lock"></i> Read-only view</p>
+  }
+</section>

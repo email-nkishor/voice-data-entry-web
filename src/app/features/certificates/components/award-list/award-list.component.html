@@ -1,0 +1,45 @@
+<section class="page">
+  <app-module-action-header title="Awards" backLink="/certificates" />
+
+  <div class="toolbar">
+    @if (canCreate) {
+      <a routerLink="/certificates/awards/add" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Award</a>
+    }
+    <button type="button" class="btn btn-outline" (click)="load()">Refresh</button>
+  </div>
+
+  <div class="filters card">
+    <select [(ngModel)]="categoryFilter" (change)="load()">
+      <option value="">All categories</option>
+      <option value="academic">Academic</option>
+      <option value="sports">Sports</option>
+      <option value="attendance">Attendance</option>
+      <option value="custom">Custom</option>
+    </select>
+  </div>
+
+  @if (loading) {
+    <p class="empty">Loading…</p>
+  } @else if (!awards.length) {
+    <p class="empty">No awards found.</p>
+  } @else {
+    <div class="card-grid">
+      @for (award of awards; track award.id) {
+        <article class="card award-card">
+          <div class="award-header">
+            <h3>{{ award.title }}</h3>
+            <span class="badge">{{ award.status }}</span>
+          </div>
+          <p class="meta">{{ award.category }} · {{ award.studentName || award.studentId }}</p>
+          <p class="date">{{ formatDate(award.awardDate) }}</p>
+          @if (award.description) {
+            <p class="desc">{{ award.description }}</p>
+          }
+          @if (canApprove && award.status === 'recommended') {
+            <button type="button" class="btn btn-primary btn-sm" (click)="approve(award)">Approve</button>
+          }
+        </article>
+      }
+    </div>
+  }
+</section>

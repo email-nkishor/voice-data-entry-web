@@ -17,6 +17,7 @@ import { SpeechSettingsService } from '../../../core/services/speech-settings.se
 import { SpeechService } from '../../../core/services/speech.service';
 import { VoiceCommandService } from '../../../core/services/voice-command.service';
 import { VoiceExtractionService } from '../../../core/services/voice-extraction.service';
+import { VoiceSessionService } from '../../../core/services/voice-session.service';
 import { SpeechEngineSelectorComponent } from '../speech-engine-selector/speech-engine-selector.component';
 
 const LANGUAGE_STORAGE_KEY = 'voice-entry-language';
@@ -30,6 +31,7 @@ const LANGUAGE_STORAGE_KEY = 'voice-entry-language';
 })
 export class VoiceInputPanelComponent implements OnInit, OnDestroy {
   @Input() columns: DynamicColumn[] = [];
+  @Input() moduleCode = 'student';
   @Input() showEngineSelector = true;
   @Output() valuesParsed = new EventEmitter<Record<string, string>>();
   @Output() resetRequested = new EventEmitter<void>();
@@ -56,6 +58,7 @@ export class VoiceInputPanelComponent implements OnInit, OnDestroy {
     private speechService: SpeechService,
     private voiceCommandService: VoiceCommandService,
     private voiceExtractionService: VoiceExtractionService,
+    private voiceSessionService: VoiceSessionService,
     public speechSettings: SpeechSettingsService
   ) {
     this.speechSupported = this.speechService.isSupported();
@@ -78,6 +81,8 @@ export class VoiceInputPanelComponent implements OnInit, OnDestroy {
     if (saved) {
       this.onLanguageChange(saved);
     }
+    this.voiceSessionService.begin(this.moduleCode);
+    this.voiceSessionService.setSpeechEngine(this.speechSettings.engine);
   }
 
   onLanguageChange(code: string): void {
@@ -106,6 +111,7 @@ export class VoiceInputPanelComponent implements OnInit, OnDestroy {
       .startListening(this.selectedLanguage)
       .subscribe((result) => {
         this.transcript = result.text;
+        this.syncSession();
 
         if (this.voiceCommandService.isResetCommand(this.transcript)) {
           this.handleResetCommand();
@@ -195,6 +201,7 @@ export class VoiceInputPanelComponent implements OnInit, OnDestroy {
       const blob = new Blob(this.audioChunks, { type: 'audio/webm' });
       this.transcript = await this.voiceExtractionService.transcribeWhisper(blob);
       await this.updatePreview();
+      this.syncSession();
       await this.applyTranscript();
       this.statusMessage = '';
     } catch (err) {
@@ -224,6 +231,15 @@ export class VoiceInputPanelComponent implements OnInit, OnDestroy {
     this.parsedPreview = {};
     this.parseWarning = '';
     this.statusMessage = '';
+    this.voiceSessionService.clear();
+  }
+
+  private syncSession(): void {
+    this.voiceSessionService.setSpeechEngine(this.speechSettings.engine);
+    this.voiceSessionService.updateTranscript(this.transcript);
+    if (Object.keys(this.parsedPreview).length > 0) {
+      this.voiceSessionService.updateProcessedJson(this.parsedPreview);
+    }
   }
 
   private async updatePreview(): Promise<void> {
@@ -243,6 +259,7 @@ export class VoiceInputPanelComponent implements OnInit, OnDestroy {
         this.transcript,
         this.columns
       );
+      this.syncSession();
       const matchedFields = Object.keys(this.parsedPreview).length;
       if (matchedFields <= 1 && this.transcript.length > 20 && !this.geminiMode) {
         this.parseWarning =

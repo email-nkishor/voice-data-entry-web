@@ -30,6 +30,15 @@
           <i class="fa-solid fa-arrow-left"></i> Back
         </a>
       }
+
+      @if (showLogout) {
+        @if (showBack || showSave || showReset) {
+          <span class="divider"></span>
+        }
+        <button type="button" class="header-btn-white" (click)="logout()">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+      }
     </div>
   </div>
 </header>

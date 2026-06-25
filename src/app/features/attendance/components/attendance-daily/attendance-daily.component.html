@@ -1,0 +1,64 @@
+<section class="page">
+  <app-module-action-header title="Daily Attendance" backLink="/attendance" />
+
+  <div class="toolbar card filters">
+    <label class="field inline">
+      <span>Group</span>
+      <select [(ngModel)]="groupId" (ngModelChange)="loadGrid()">
+        @for (g of groups; track g.id) {
+          <option [ngValue]="g.id">{{ g.name }}</option>
+        }
+      </select>
+    </label>
+    <label class="field inline">
+      <span>Date</span>
+      <input [(ngModel)]="date" type="date" (change)="loadGrid()" />
+    </label>
+    <a routerLink="/attendance/reports" class="btn btn-outline">Reports</a>
+    @if (canMark) {
+      <button type="button" class="btn btn-primary" [disabled]="saving || !grid.length" (click)="saveAll()">
+        {{ saving ? 'Saving…' : 'Save All' }}
+      </button>
+    }
+  </div>
+
+  @if (loading) {
+    <p class="empty-state">Loading…</p>
+  } @else if (!grid.length) {
+    <p class="empty-state">No students in this group.</p>
+  } @else {
+    <div class="card table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Roll No</th>
+            <th>Student</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of grid; track row.student.id) {
+            <tr>
+              <td>{{ row.student.rollNo || '—' }}</td>
+              <td>{{ row.student.name }}</td>
+              <td>
+                @if (canMark) {
+                  <select
+                    [ngModel]="marks.get(row.student.id)"
+                    (ngModelChange)="setStatus(row.student.id, $event)"
+                  >
+                    @for (s of statusOptions; track s) {
+                      <option [value]="s">{{ statusLabel(s) }}</option>
+                    }
+                  </select>
+                } @else {
+                  {{ row.attendance ? statusLabel(row.attendance.status) : '—' }}
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

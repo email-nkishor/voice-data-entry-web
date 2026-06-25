@@ -31,7 +31,7 @@ export class LoginComponent {
     try {
       await this.authService.login(this.email.trim(), this.password);
       this.toastService.success('Signed in successfully');
-      this.router.navigate(['/dashboard']);
+      this.router.navigate([this.authService.getPostLoginRoute()]);
     } catch {
       this.toastService.error('Invalid email or password. Is the API running?');
     } finally {

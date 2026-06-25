@@ -1,3 +1,47 @@
+.kpi-strip {
+  margin-bottom: var(--space-md);
+  padding: 1rem 1.25rem;
+}
+
+.kpi-strip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+
+  h2 {
+    margin: 0;
+    font-size: var(--font-size-lg);
+  }
+}
+
+.kpi-link {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary-blue);
+  text-decoration: none;
+}
+
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.75rem;
+}
+
+.kpi-item {
+  text-align: center;
+
+  strong {
+    display: block;
+    font-size: 1.5rem;
+    line-height: 1.2;
+  }
+
+  span {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+  }
+}
+
 .intro {
   color: var(--text-muted);
   margin: 0 0 var(--space-sm);
@@ -17,10 +61,22 @@
   margin-bottom: var(--space-md);
 }
 
+.section-title {
+  margin: var(--space-lg) 0 var(--space-sm);
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+
+  &:first-of-type {
+    margin-top: 0;
+  }
+}
+
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: var(--space-md);
+  margin-bottom: var(--space-md);
 }
 
 .nav-card {

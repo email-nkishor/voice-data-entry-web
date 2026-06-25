@@ -1,0 +1,35 @@
+<section class="page">
+  <app-module-action-header title="Certificate Detail" backLink="/certificates" />
+
+  @if (cert) {
+    <div class="card detail">
+      <div class="header">
+        <h2>{{ cert.title }}</h2>
+        <span class="badge status-{{ cert.status }}">{{ cert.status }}</span>
+      </div>
+      <dl>
+        <div><dt>Certificate Number</dt><dd><code>{{ cert.certificateNumber }}</code></dd></div>
+        <div><dt>Student</dt><dd>{{ cert.studentName || cert.studentId }}</dd></div>
+        <div><dt>Type</dt><dd>{{ cert.certificateType }}</dd></div>
+        <div><dt>Issue Date</dt><dd>{{ formatDate(cert.issueDate) }}</dd></div>
+        <div><dt>Issued By</dt><dd>{{ cert.issuedBy }}</dd></div>
+        <div><dt>Verification Code</dt><dd><code>{{ cert.verificationCode || '—' }}</code></dd></div>
+        @if (cert.description) {
+          <div class="full"><dt>Description</dt><dd>{{ cert.description }}</dd></div>
+        }
+        @if (cert.attachmentUrl) {
+          <div class="full">
+            <dt>Attachment</dt>
+            <dd><a [href]="cert.attachmentUrl" target="_blank" rel="noopener">Download / View</a></dd>
+          </div>
+        }
+        @if (cert.revokeReason) {
+          <div class="full"><dt>Revoke Reason</dt><dd>{{ cert.revokeReason }}</dd></div>
+        }
+      </dl>
+      @if (canRevoke && cert.status !== 'revoked') {
+        <button type="button" class="btn btn-danger" (click)="revoke()">Revoke Certificate</button>
+      }
+    </div>
+  }
+</section>

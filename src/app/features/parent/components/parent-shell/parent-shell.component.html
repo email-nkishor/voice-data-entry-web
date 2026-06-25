@@ -1,0 +1,43 @@
+<div class="parent-shell">
+  <header class="parent-header card">
+    <div>
+      <h1>Parent Portal</h1>
+      <p>View your children's academic information (read-only)</p>
+    </div>
+    @if (children.length > 1) {
+      <label class="child-select">
+        <span>Child</span>
+        <select
+          #childSelect
+          [value]="selectedStudentId ?? ''"
+          (change)="selectedStudentId = +childSelect.value"
+        >
+          @for (child of children; track child.studentId) {
+            <option [value]="child.studentId">{{ child.name }} ({{ child.class }})</option>
+          }
+        </select>
+      </label>
+    }
+  </header>
+
+  @if (selectedStudentId) {
+    <nav class="parent-nav card">
+      <a routerLink="/parent/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
+      <a [routerLink]="childBase(selectedStudentId) + '/profile'" routerLinkActive="active">Profile</a>
+      <a [routerLink]="childBase(selectedStudentId) + '/events'" routerLinkActive="active">Events</a>
+      @if (attendanceEnabled) {
+        <a [routerLink]="childBase(selectedStudentId) + '/attendance'" routerLinkActive="active">Attendance</a>
+      }
+      <a [routerLink]="childBase(selectedStudentId) + '/certificates'" routerLinkActive="active">Certificates</a>
+      <a [routerLink]="childBase(selectedStudentId) + '/awards'" routerLinkActive="active">Awards</a>
+      <a [routerLink]="childBase(selectedStudentId) + '/voice'" routerLinkActive="active">Voice</a>
+      <a routerLink="/parent/settings" routerLinkActive="active">Settings</a>
+      <a routerLink="/dashboard" class="muted">Exit</a>
+      <button type="button" class="logout-btn" (click)="logout()">Logout</button>
+    </nav>
+  }
+
+  <main class="parent-content">
+    <router-outlet />
+  </main>
+</div>

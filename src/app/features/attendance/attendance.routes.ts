@@ -9,6 +9,20 @@ export const ATTENDANCE_ROUTES: Routes = [
       ),
   },
   {
+    path: 'daily',
+    loadComponent: () =>
+      import('./components/attendance-daily/attendance-daily.component').then(
+        (m) => m.AttendanceDailyComponent
+      ),
+  },
+  {
+    path: 'reports',
+    loadComponent: () =>
+      import('./components/attendance-reports/attendance-reports.component').then(
+        (m) => m.AttendanceReportsComponent
+      ),
+  },
+  {
     path: 'entry',
     loadComponent: () =>
       import('./components/attendance-entry/attendance-entry.component').then(

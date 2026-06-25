@@ -1,7 +1,17 @@
+import { VoiceEntryRecord } from '../models/voice-entry.model';
+
 export type SyncEntity =
   | 'student'
   | 'studentGroup'
   | 'attendance'
+  | 'event'
+  | 'eventParticipant'
+  | 'customFieldDefinition'
+  | 'customFieldValue'
+  | 'voiceEntry'
+  | 'certificate'
+  | 'certificateTemplate'
+  | 'award'
   | 'expense'
   | 'inventory'
   | 'survey'

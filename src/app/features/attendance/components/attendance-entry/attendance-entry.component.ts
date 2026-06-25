@@ -43,7 +43,7 @@ export class AttendanceEntryComponent implements OnInit {
     this.columns = await this.formSchemaService.getColumns(this.moduleCode);
     this.resetForm();
     this.formValues['attendanceDate'] = new Date().toISOString().split('T')[0];
-    this.formValues['status'] = 'Present';
+    this.formValues['status'] = 'present';
     if (this.students[0]?.id) {
       this.selectedStudentId = this.students[0].id;
     }
@@ -53,7 +53,7 @@ export class AttendanceEntryComponent implements OnInit {
     this.validationErrors = {};
     this.resetForm();
     this.formValues['attendanceDate'] = new Date().toISOString().split('T')[0];
-    this.formValues['status'] = 'Present';
+    this.formValues['status'] = 'present';
   }
 
   async onSave(): Promise<void> {
@@ -75,7 +75,7 @@ export class AttendanceEntryComponent implements OnInit {
       status: this.normalizeStatus(this.formValues['status']),
     };
 
-    await this.attendanceService.add(attendance);
+    await this.attendanceService.addLocal(attendance);
     this.toastService.success('Saved successfully');
     this.router.navigate(['/attendance']);
   }
@@ -83,9 +83,15 @@ export class AttendanceEntryComponent implements OnInit {
   private normalizeStatus(value: string): AttendanceStatus {
     const normalized = value.trim().toLowerCase();
     if (normalized.includes('absent') || normalized.includes('अनुपस्थित')) {
-      return 'Absent';
+      return 'absent';
     }
-    return 'Present';
+    if (normalized.includes('late') || normalized.includes('देर')) {
+      return 'late';
+    }
+    if (normalized.includes('excused')) {
+      return 'excused';
+    }
+    return 'present';
   }
 
   private resetForm(): void {
